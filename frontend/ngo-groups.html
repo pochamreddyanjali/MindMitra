@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width,
+                   initial-scale=1.0">
+
+    <title>NGO Groups</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+
+            background:#fffbeb;
+
+            min-height:100vh;
+
+            padding:30px;
+        }
+
+        h1{
+
+            text-align:center;
+
+            color:#d97706;
+
+            margin-bottom:40px;
+
+            font-size:45px;
+        }
+
+        .top-bar{
+
+            display:flex;
+
+            justify-content:center;
+
+            margin-bottom:40px;
+        }
+
+        .create-btn{
+
+            padding:15px 30px;
+
+            border:none;
+
+            border-radius:14px;
+
+            background:#d97706;
+
+            color:white;
+
+            font-size:18px;
+
+            cursor:pointer;
+        }
+
+        .groups-container{
+
+            display:grid;
+
+            grid-template-columns:
+                repeat(auto-fit,minmax(340px,1fr));
+
+            gap:25px;
+        }
+
+        .group-card{
+
+            background:white;
+
+            padding:25px;
+
+            border-radius:20px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+
+            transition:0.3s;
+        }
+
+        .group-card:hover{
+
+            transform:translateY(-8px);
+        }
+
+        .group-icon{
+
+            font-size:60px;
+
+            margin-bottom:20px;
+        }
+
+        .group-card h2{
+
+            color:#d97706;
+
+            margin-bottom:15px;
+        }
+
+        .group-card p{
+
+            color:#555;
+
+            margin-bottom:12px;
+
+            line-height:1.6;
+        }
+
+        .privacy{
+
+            display:inline-block;
+
+            padding:8px 15px;
+
+            border-radius:20px;
+
+            font-size:14px;
+
+            color:white;
+
+            margin-bottom:15px;
+        }
+
+        .public{
+
+            background:green;
+        }
+
+        .private{
+
+            background:#dc2626;
+        }
+
+        .buttons{
+
+            display:grid;
+
+            grid-template-columns:
+                repeat(2,1fr);
+
+            gap:12px;
+
+            margin-top:20px;
+        }
+
+        .buttons button{
+
+            padding:12px;
+
+            border:none;
+
+            border-radius:12px;
+
+            color:white;
+
+            cursor:pointer;
+
+            font-size:15px;
+        }
+
+        .announcement-btn{
+
+            background:#2563eb;
+        }
+
+        .poll-btn{
+
+            background:#7c3aed;
+        }
+
+        .event-btn{
+
+            background:#059669;
+        }
+
+        .chat-btn{
+
+            background:#ea580c;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <h1>🤝 NGO Groups</h1>
+
+    <!-- TOP BUTTON -->
+
+    <div class="top-bar">
+
+        <button class="create-btn"
+                onclick="openCreateGroup()">
+
+            + Create New Group
+
+        </button>
+
+    </div>
+
+    <!-- GROUPS -->
+
+    <div class="groups-container"
+         id="groupsContainer">
+
+    </div>
+
+    <script>
+
+        const API_URL =
+            "http://localhost:8081/ngo-group";
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        // NGO EMAIL
+
+        const ngoEmail =
+            params.get(
+                "ngoEmail"
+            ) ||
+            localStorage.getItem(
+                "ngoEmail"
+            );
+
+        const ngoName =
+            params.get(
+                "ngoName"
+            ) ||
+            localStorage.getItem(
+                "ngoName"
+            );
+
+        // =========================
+        // LOAD GROUPS
+        // =========================
+
+        async function loadGroups(){
+
+            if(!ngoEmail){
+
+                document.getElementById(
+                    "groupsContainer"
+                ).innerHTML = `
+
+                    <h2>
+                        NGO login is required.
+                    </h2>
+
+                `;
+
+                return;
+
+            }
+
+            const response =
+                await fetch(
+
+                    `${API_URL}/ngo/${encodeURIComponent(ngoEmail)}`
+
+                );
+
+            const groups =
+                await response.json();
+
+            await Promise.all(
+
+                groups.map(async group => {
+
+                    const memberResponse =
+                        await fetch(
+
+                            `${API_URL}/members/${group.id}`
+
+                        );
+
+                    const members =
+                        await memberResponse.json();
+
+                    group.memberCount =
+                        members.length;
+
+                })
+
+            );
+
+            displayGroups(groups);
+
+        }
+
+        // =========================
+        // DISPLAY GROUPS
+        // =========================
+
+        function displayGroups(groups){
+
+            const container =
+                document.getElementById(
+                    "groupsContainer"
+                );
+
+            container.innerHTML = "";
+
+            if(groups.length === 0){
+
+                container.innerHTML = `
+
+                    <h2>
+                        No Groups Created Yet
+                    </h2>
+
+                `;
+
+                return;
+
+            }
+
+            groups.forEach(group => {
+
+                container.innerHTML += `
+
+                    <div class="group-card">
+
+                        <div class="group-icon">
+                            👥
+                        </div>
+
+                        <h2>
+                            ${group.groupName}
+                        </h2>
+
+                        <div class="privacy
+                            ${group.privacy === 'PUBLIC'
+                                ? 'public'
+                                : 'private'}">
+
+                            ${group.privacy}
+
+                        </div>
+
+                        <p>
+
+                            <b>Description:</b><br>
+
+                            ${group.description}
+
+                        </p>
+
+                        <p>
+
+                            <b>Meeting Link:</b><br>
+
+                            ${group.meetingLink || 'N/A'}
+
+                        </p>
+
+                        <p>
+
+                            <b>Activities:</b><br>
+
+                            ${group.activityDetails || 'N/A'}
+
+                        </p>
+
+                        <p>
+
+                            <b>Joined Members:</b><br>
+
+                            ${group.memberCount || 0}
+
+                        </p>
+
+                        <div class="buttons">
+
+                            <button
+                                class="announcement-btn"
+
+                                onclick="
+                                openAnnouncements(
+                                    ${group.id}
+                                )">
+
+                                Announcements
+
+                            </button>
+
+                            <button
+                                class="poll-btn"
+
+                                onclick="
+                                openPolls(
+                                    ${group.id}
+                                )">
+
+                                Polls
+
+                            </button>
+
+                            <button
+                                class="event-btn"
+
+                                onclick="
+                                openEvents(
+                                    ${group.id}
+                                )">
+
+                                Events
+
+                            </button>
+
+                            <button
+                                class="chat-btn"
+
+                                onclick="
+                                openChat(
+                                    ${group.id}
+                                )">
+
+                                Chat
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            });
+
+        }
+
+        // =========================
+        // OPEN CREATE GROUP
+        // =========================
+
+        function openCreateGroup(){
+
+            window.location.href =
+                "ngo-create-group.html";
+
+        }
+
+        // =========================
+        // OPEN ANNOUNCEMENTS
+        // =========================
+
+        function openAnnouncements(groupId){
+
+            window.location.href =
+
+                `ngo-announcements.html?groupId=${groupId}&ngoEmail=${encodeURIComponent(ngoEmail)}&ngoName=${encodeURIComponent(ngoName || "")}`;
+
+        }
+
+        // =========================
+        // OPEN POLLS
+        // =========================
+
+        function openPolls(groupId){
+
+            window.location.href =
+
+                `ngo-polls.html?groupId=${groupId}&ngoEmail=${encodeURIComponent(ngoEmail)}&ngoName=${encodeURIComponent(ngoName || "")}`;
+
+        }
+
+        // =========================
+        // OPEN EVENTS
+        // =========================
+
+        function openEvents(groupId){
+
+            window.location.href =
+
+                `ngo-events.html?groupId=${groupId}&ngoEmail=${encodeURIComponent(ngoEmail)}&ngoName=${encodeURIComponent(ngoName || "")}`;
+
+        }
+
+        // =========================
+        // OPEN CHAT
+        // =========================
+
+        function openChat(groupId){
+
+            window.location.href =
+
+                `ngo-chat.html?groupId=${groupId}&ngoEmail=${encodeURIComponent(ngoEmail)}&ngoName=${encodeURIComponent(ngoName || "")}`;
+
+        }
+
+        // =========================
+        // INITIAL LOAD
+        // =========================
+
+        loadGroups();
+
+        window.addEventListener(
+
+            "focus",
+
+            loadGroups
+
+        );
+
+        setInterval(
+
+            loadGroups,
+
+            5000
+
+        );
+
+    </script>
+
+</body>
+
+</html>

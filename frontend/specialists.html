@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>MindMitra Specialists</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+
+            background:#ecfdf5;
+
+            min-height:100vh;
+
+            padding:30px;
+        }
+
+        h1{
+
+            text-align:center;
+
+            color:#059669;
+
+            font-size:50px;
+
+            margin-bottom:10px;
+        }
+
+        .subtitle{
+
+            text-align:center;
+
+            color:#555;
+
+            margin-bottom:40px;
+
+            font-size:20px;
+        }
+
+        .search-box{
+
+            max-width:500px;
+
+            margin:0 auto 40px auto;
+        }
+
+        .search-box input{
+
+            width:100%;
+
+            padding:16px;
+
+            border-radius:15px;
+
+            border:1px solid #ddd;
+
+            font-size:16px;
+        }
+
+        .container{
+
+            display:grid;
+
+            grid-template-columns:
+                repeat(auto-fit,minmax(320px,1fr));
+
+            gap:25px;
+        }
+
+        .card{
+
+            background:white;
+
+            padding:25px;
+
+            border-radius:20px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+
+            transition:0.3s;
+
+            text-align:center;
+        }
+
+        .card:hover{
+
+            transform:translateY(-8px);
+        }
+
+        .profile-image{
+
+            width:90px;
+
+            height:90px;
+
+            border-radius:50%;
+
+            object-fit:cover;
+
+            margin-bottom:15px;
+
+            border:3px solid #059669;
+        }
+
+        .card h2{
+
+            color:#059669;
+
+            margin-bottom:12px;
+        }
+
+        .card p{
+
+            margin-bottom:10px;
+
+            color:#555;
+
+            line-height:1.6;
+        }
+
+        .connect-btn{
+
+            width:100%;
+
+            margin-top:15px;
+
+            padding:14px;
+
+            border:none;
+
+            border-radius:12px;
+
+            background:#059669;
+
+            color:white;
+
+            font-size:16px;
+
+            cursor:pointer;
+
+            transition:0.3s;
+        }
+
+        .connect-btn:hover{
+
+            background:#047857;
+        }
+
+        .status-box{
+
+            margin-top:15px;
+
+            padding:15px;
+
+            border-radius:12px;
+
+            background:#f0fdf4;
+
+            border:1px solid #bbf7d0;
+
+            text-align:left;
+        }
+
+        .pending{
+
+            color:#f59e0b;
+
+            font-weight:bold;
+        }
+
+        .accepted{
+
+            color:#10b981;
+
+            font-weight:bold;
+        }
+
+        .rejected{
+
+            color:#ef4444;
+
+            font-weight:bold;
+        }
+
+        .chat-wrapper{
+
+            position:relative;
+
+            width:100%;
+
+            margin-top:15px;
+        }
+
+        .badge{
+
+            position:absolute;
+
+            top:-8px;
+
+            right:-8px;
+
+            background:red;
+
+            color:white;
+
+            border-radius:50%;
+
+            min-width:24px;
+
+            height:24px;
+
+            display:flex;
+
+            align-items:center;
+
+            justify-content:center;
+
+            font-size:12px;
+
+            font-weight:bold;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <h1>🩺 Specialists Connect</h1>
+
+    <p class="subtitle">
+        Connect with verified wellness specialists
+    </p>
+
+    <div class="search-box">
+
+        <input type="text"
+               id="search"
+               placeholder="Search specialization..."
+               onkeyup="filterSpecialists()">
+
+    </div>
+
+    <div class="container"
+         id="specialistContainer">
+
+    </div>
+
+    <script>
+
+        const API_URL =
+            "http://localhost:8081/specialist";
+
+        const APPOINTMENT_API =
+            "http://localhost:8081/appointment";
+
+        const MESSAGE_API =
+            "http://localhost:8081/message";
+
+        let specialists = [];
+
+        let userAppointments = [];
+
+        // =========================
+        // GET USER EMAIL FROM URL
+        // =========================
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        const userEmail =
+            params.get("userEmail");
+
+        // =========================
+        // LOAD SPECIALISTS
+        // =========================
+
+        async function loadSpecialists(){
+
+            try{
+
+                // LOAD SPECIALISTS
+
+                const specialistResponse =
+                    await fetch(
+                        `${API_URL}/all-approved`
+                    );
+
+                specialists =
+                    await specialistResponse.json();
+
+                // LOAD USER APPOINTMENTS
+
+                if(userEmail){
+
+                    const appointmentResponse =
+                        await fetch(
+
+                            `${APPOINTMENT_API}/user/${userEmail}`
+
+                        );
+
+                    userAppointments =
+                        await appointmentResponse.json();
+
+                }
+
+                displaySpecialists(
+                    specialists
+                );
+
+                setTimeout(() => {
+
+                    loadUnreadCounts();
+
+                },500);
+
+            }
+
+            catch(error){
+
+                console.log(
+                    "Error Loading Specialists",
+                    error
+                );
+
+            }
+
+        }
+
+        // =========================
+        // DISPLAY SPECIALISTS
+        // =========================
+
+        function displaySpecialists(data){
+
+            const container =
+                document.getElementById(
+                    "specialistContainer"
+                );
+
+            container.innerHTML = "";
+
+            data.forEach(s => {
+
+                // CHECK EXISTING REQUEST
+
+                const existingRequest =
+                    userAppointments.find(a =>
+
+                        a.specialistEmail ===
+                        s.email
+
+                    );
+
+                let buttonSection = "";
+
+                // =========================
+                // REQUEST EXISTS
+                // =========================
+
+                if(existingRequest){
+
+                    let statusClass = "";
+
+                    if(existingRequest.status
+                        === "PENDING"){
+
+                        statusClass =
+                            "pending";
+
+                    }
+
+                    else if(existingRequest.status
+                        === "ACCEPTED"){
+
+                        statusClass =
+                            "accepted";
+
+                    }
+
+                    else{
+
+                        statusClass =
+                            "rejected";
+
+                    }
+
+                    buttonSection = `
+
+                        <div class="status-box">
+
+                            <p class="${statusClass}">
+
+                                Status :
+                                ${existingRequest.status}
+
+                            </p>
+
+                            ${
+                                existingRequest.specialistOpinion
+
+                                ?
+
+                                `
+
+                                <p>
+
+                                    <b>Specialist Response:</b>
+
+                                    ${existingRequest.specialistOpinion}
+
+                                </p>
+
+                                `
+
+                                :
+
+                                ""
+
+                            }
+
+                            ${
+                                existingRequest.specialistAvailability
+
+                                ?
+
+                                `
+
+                                <p>
+
+                                    <b>Availability:</b>
+
+                                    ${existingRequest.specialistAvailability}
+
+                                </p>
+
+                                `
+
+                                :
+
+                                ""
+
+                            }
+
+                            ${
+                                existingRequest.communicationMode
+
+                                ?
+
+                                `
+
+                                <p>
+
+                                    <b>Mode:</b>
+
+                                    ${existingRequest.communicationMode}
+
+                                </p>
+
+                                `
+
+                                :
+
+                                ""
+
+                            }
+
+                            ${
+                                existingRequest.meetingLink
+
+                                ?
+
+                                `
+
+                                <p>
+
+                                    <b>
+
+                                        ${
+                                            existingRequest.communicationMode
+                                            === "Online"
+
+                                            ?
+
+                                            "Meeting Link"
+
+                                            :
+
+                                            "Meeting Location"
+
+                                        }:
+
+                                    </b>
+
+                                    ${
+                                        existingRequest.communicationMode
+                                        === "Online"
+
+                                        ?
+
+                                        `
+
+                                        <a href="${existingRequest.meetingLink}"
+                                           target="_blank">
+
+                                            Open Meeting
+
+                                        </a>
+
+                                        `
+
+                                        :
+
+                                        existingRequest.meetingLink
+
+                                    }
+
+                                </p>
+
+                                `
+
+                                :
+
+                                ""
+
+                            }
+
+                            ${
+                                existingRequest.status === "ACCEPTED"
+
+                                ?
+
+                                `
+
+                                <div class="chat-wrapper">
+
+                                    <button class="connect-btn"
+
+                                        onclick="openChat(
+                                            '${userEmail}',
+                                            '${s.email}',
+                                            '${s.name}'
+                                        )">
+
+                                        Chat With Specialist
+
+                                    </button>
+
+                                    <span
+                                        class="badge"
+                                        id="badge-${s.email}"
+
+                                        style="display:none;">
+
+                                    </span>
+
+                                </div>
+
+                                `
+
+                                :
+
+                                ""
+
+                            }
+
+                        </div>
+
+                    `;
+
+                }
+
+                // =========================
+                // NO REQUEST YET
+                // =========================
+
+                else{
+
+                    buttonSection = `
+
+                        <button class="connect-btn"
+
+                            onclick="connectSpecialist(
+                                '${s.email}',
+                                '${s.name}'
+                            )">
+
+                            Connect
+
+                        </button>
+
+                    `;
+
+                }
+
+                // =========================
+                // CARD UI
+                // =========================
+
+                container.innerHTML += `
+
+                    <div class="card">
+
+                        <img
+
+                            src="${
+                                s.profileImage ||
+
+                                'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'
+                            }"
+
+                            class="profile-image">
+
+                        <h2>${s.name}</h2>
+
+                        <p>
+                            <b>Specialization:</b>
+                            ${s.specialization}
+                        </p>
+
+                        <p>
+                            <b>Qualification:</b>
+                            ${s.qualification}
+                        </p>
+
+                        <p>
+                            <b>Experience:</b>
+                            ${s.experience}
+                        </p>
+
+                        <p>
+                            <b>Bio:</b>
+                            ${s.bio}
+                        </p>
+
+                        ${buttonSection}
+
+                    </div>
+
+                `;
+
+            });
+
+        }
+
+        // =========================
+        // LOAD UNREAD COUNTS
+        // =========================
+
+        async function loadUnreadCounts(){
+
+            for(const s of specialists){
+
+                try{
+
+                    const response =
+                        await fetch(
+
+                            `${MESSAGE_API}/unread-between?sender=${s.email}&receiver=${userEmail}`
+
+                        );
+
+                    const count =
+                        await response.text();
+
+                    const badge =
+                        document.getElementById(
+                            `badge-${s.email}`
+                        );
+
+                    if(
+
+                        badge &&
+
+                        count > 0
+
+                    ){
+
+                        badge.style.display =
+                            "flex";
+
+                        badge.innerText =
+                            count;
+
+                    }
+
+                }
+
+                catch(error){
+
+                    console.log(error);
+
+                }
+
+            }
+
+        }
+
+        // =========================
+        // SEARCH FILTER
+        // =========================
+
+        function filterSpecialists(){
+
+            const search =
+                document.getElementById("search")
+                .value
+                .toLowerCase();
+
+            const filtered =
+                specialists.filter(s =>
+
+                    s.specialization
+                    .toLowerCase()
+                    .includes(search)
+
+                );
+
+            displaySpecialists(
+                filtered
+            );
+
+        }
+
+        // =========================
+        // CONNECT SPECIALIST
+        // =========================
+
+        function connectSpecialist(
+            specialistEmail,
+            specialistName
+        ){
+
+            window.location.href =
+
+                `connect.html?userEmail=${userEmail}&specialistEmail=${specialistEmail}&specialistName=${specialistName}`;
+
+        }
+
+        // =========================
+        // OPEN CHAT
+        // =========================
+
+        function openChat(
+
+            userEmail,
+
+            specialistEmail,
+
+            specialistName
+
+        ){
+
+            window.location.href =
+
+            `chat.html?sender=${userEmail}&receiver=${specialistEmail}&name=${specialistName}`;
+
+        }
+
+        // =========================
+        // AUTO REFRESH
+        // =========================
+
+        setInterval(() => {
+
+            loadUnreadCounts();
+
+        },3000);
+
+        // =========================
+        // INITIAL LOAD
+        // =========================
+
+        loadSpecialists();
+
+    </script>
+
+</body>
+
+</html>

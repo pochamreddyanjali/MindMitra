@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Group Requests</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+
+            background:#fff7ed;
+
+            padding:30px;
+        }
+
+        h1{
+
+            color:#d97706;
+
+            margin-bottom:30px;
+
+            text-align:center;
+        }
+
+        .container{
+
+            display:grid;
+
+            grid-template-columns:
+                repeat(auto-fit,minmax(320px,1fr));
+
+            gap:25px;
+        }
+
+        .card{
+
+            background:white;
+
+            padding:25px;
+
+            border-radius:20px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .card h2{
+
+            color:#d97706;
+
+            margin-bottom:15px;
+        }
+
+        .card p{
+
+            margin-bottom:10px;
+
+            color:#444;
+        }
+
+        .btn-group{
+
+            display:flex;
+
+            gap:15px;
+
+            margin-top:20px;
+        }
+
+        .approve-btn{
+
+            flex:1;
+
+            padding:12px;
+
+            border:none;
+
+            border-radius:12px;
+
+            background:#16a34a;
+
+            color:white;
+
+            cursor:pointer;
+        }
+
+        .reject-btn{
+
+            flex:1;
+
+            padding:12px;
+
+            border:none;
+
+            border-radius:12px;
+
+            background:#dc2626;
+
+            color:white;
+
+            cursor:pointer;
+        }
+
+        .empty{
+
+            text-align:center;
+
+            margin-top:60px;
+
+            font-size:22px;
+
+            color:#666;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <h1>
+        📥 Group Join Requests
+    </h1>
+
+    <div class="container"
+         id="requestContainer">
+
+    </div>
+
+    <div class="empty"
+         id="emptyText"
+         style="display:none;">
+
+        No Pending Requests
+
+    </div>
+
+    <script>
+
+        const API_URL =
+            "http://localhost:8081/ngo-group";
+
+        const ngoEmail =
+            localStorage.getItem(
+                "ngoEmail"
+            );
+
+        // =========================
+        // LOAD REQUESTS
+        // =========================
+
+        async function loadRequests(){
+
+            const response =
+                await fetch(
+
+                    `${API_URL}/pending/${ngoEmail}`
+
+                );
+
+            const requests =
+                await response.json();
+
+            const container =
+                document.getElementById(
+                    "requestContainer"
+                );
+
+            const emptyText =
+                document.getElementById(
+                    "emptyText"
+                );
+
+            container.innerHTML = "";
+
+            // EMPTY
+
+            if(requests.length === 0){
+
+                emptyText.style.display =
+                    "block";
+
+                return;
+
+            }
+
+            emptyText.style.display =
+                "none";
+
+            // DISPLAY REQUESTS
+
+            requests.forEach(r => {
+
+                container.innerHTML += `
+
+                    <div class="card">
+
+                        <h2>
+                            ${r.groupName}
+                        </h2>
+
+                        <p>
+
+                            <b>User:</b>
+                            ${r.userName}
+
+                        </p>
+
+                        <p>
+
+                            <b>Email:</b>
+                            ${r.userEmail}
+
+                        </p>
+
+                        <p>
+
+                            <b>Status:</b>
+                            ${r.status}
+
+                        </p>
+
+                        <div class="btn-group">
+
+                            <button
+                                class="approve-btn"
+
+                                onclick="
+                                approveRequest(
+                                    ${r.id}
+                                )">
+
+                                Approve
+
+                            </button>
+
+                            <button
+                                class="reject-btn"
+
+                                onclick="
+                                rejectRequest(
+                                    ${r.id}
+                                )">
+
+                                Reject
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            });
+
+        }
+
+        // =========================
+        // APPROVE REQUEST
+        // =========================
+
+        async function approveRequest(id){
+
+            const response =
+                await fetch(
+
+                    `${API_URL}/approve/${id}`,
+
+                    {
+                        method:"PUT"
+                    }
+
+                );
+
+            const result =
+                await response.text();
+
+            alert(result);
+
+            loadRequests();
+
+        }
+
+        // =========================
+        // REJECT REQUEST
+        // =========================
+
+        async function rejectRequest(id){
+
+            const response =
+                await fetch(
+
+                    `${API_URL}/reject/${id}`,
+
+                    {
+                        method:"PUT"
+                    }
+
+                );
+
+            const result =
+                await response.text();
+
+            alert(result);
+
+            loadRequests();
+
+        }
+
+        // =========================
+        // INITIAL LOAD
+        // =========================
+
+        loadRequests();
+
+    </script>
+
+</body>
+</html>

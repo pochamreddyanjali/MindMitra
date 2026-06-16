@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width,
+                   initial-scale=1.0">
+
+    <title>NGO Updates</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+
+            background:#fff7ed;
+
+            min-height:100vh;
+
+            padding:30px;
+        }
+
+        h1{
+
+            text-align:center;
+
+            color:#ea580c;
+
+            font-size:48px;
+
+            margin-bottom:12px;
+        }
+
+        .subtitle{
+
+            text-align:center;
+
+            color:#666;
+
+            margin-bottom:40px;
+
+            font-size:18px;
+        }
+
+        .section{
+
+            margin-bottom:45px;
+        }
+
+        .section-title{
+
+            color:#ea580c;
+
+            font-size:34px;
+
+            margin-bottom:20px;
+        }
+
+        .container{
+
+            display:grid;
+
+            grid-template-columns:
+                repeat(auto-fit,minmax(320px,1fr));
+
+            gap:25px;
+        }
+
+        .card{
+
+            background:white;
+
+            padding:25px;
+
+            border-radius:20px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .card h2{
+
+            color:#ea580c;
+
+            margin-bottom:15px;
+        }
+
+        .card p{
+
+            margin-bottom:10px;
+
+            color:#555;
+
+            line-height:1.7;
+        }
+
+        .meeting-btn{
+
+            display:inline-block;
+
+            margin-top:15px;
+
+            padding:12px 18px;
+
+            border-radius:12px;
+
+            background:#2563eb;
+
+            color:white;
+
+            text-decoration:none;
+        }
+
+        .empty{
+
+            color:#777;
+
+            font-size:20px;
+
+            margin-top:15px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <!-- TITLE -->
+
+    <h1>📢 NGO Updates</h1>
+
+    <p class="subtitle">
+
+        Stay updated with NGO announcements,
+        events, polls and wellness activities
+
+    </p>
+
+    <!-- ANNOUNCEMENTS -->
+
+    <div class="section">
+
+        <div class="section-title">
+
+            📢 Announcements
+
+        </div>
+
+        <div class="container"
+             id="announcementContainer">
+
+        </div>
+
+    </div>
+
+    <!-- EVENTS -->
+
+    <div class="section">
+
+        <div class="section-title">
+
+            🎉 Events
+
+        </div>
+
+        <div class="container"
+             id="eventContainer">
+
+        </div>
+
+    </div>
+
+    <!-- POLLS -->
+
+    <div class="section">
+
+        <div class="section-title">
+
+            📊 Polls
+
+        </div>
+
+        <div class="container"
+             id="pollContainer">
+
+        </div>
+
+    </div>
+
+    <script>
+
+        const ANNOUNCEMENT_API =
+            "http://localhost:8081/announcement";
+
+        const EVENT_API =
+            "http://localhost:8081/ngo-event";
+
+        const POLL_API =
+            "http://localhost:8081/poll";
+
+        const NGO_API =
+            "http://localhost:8081/ngo";
+
+        // =========================
+        // URL PARAMS
+        // =========================
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        const ngoEmail =
+            params.get("ngoEmail");
+
+        let selectedNgoName =
+            params.get("ngoName") ||
+            "";
+
+        function belongsToSelectedNgo(item){
+
+            return item.ngoEmail === ngoEmail;
+
+        }
+
+        // =========================
+        // LOAD NGO DETAILS
+        // =========================
+
+        async function loadNgoDetails(){
+
+            if(selectedNgoName || !ngoEmail){
+
+                return;
+
+            }
+
+            const response =
+                await fetch(
+
+                    `${NGO_API}/get/${encodeURIComponent(ngoEmail)}`
+
+                );
+
+            const ngo =
+                await response.json();
+
+            selectedNgoName =
+                ngo.name || ngoEmail;
+
+        }
+
+        // =========================
+        // LOAD ANNOUNCEMENTS
+        // =========================
+
+        async function loadAnnouncements(){
+
+            const response =
+                await fetch(
+
+                    `${ANNOUNCEMENT_API}/ngo/${ngoEmail}`
+
+                );
+
+            const announcements =
+                await response.json();
+
+            displayAnnouncements(
+                announcements.filter(
+                    belongsToSelectedNgo
+                )
+            );
+
+        }
+
+        // =========================
+        // DISPLAY ANNOUNCEMENTS
+        // =========================
+
+        function displayAnnouncements(
+            announcements
+        ){
+
+            const container =
+                document.getElementById(
+                    "announcementContainer"
+                );
+
+            container.innerHTML = "";
+
+            if(announcements.length === 0){
+
+                container.innerHTML =
+
+                    `<div class="empty">
+                        No announcements available
+                    </div>`;
+
+                return;
+
+            }
+
+            announcements.forEach(a => {
+
+                container.innerHTML += `
+
+                    <div class="card">
+
+                        <h2>
+                            ${a.title}
+                        </h2>
+
+                        <p>
+
+                            ${a.message}
+
+                        </p>
+
+                        <p>
+
+                            <b>NGO:</b>
+                            ${selectedNgoName || a.ngoName || ngoEmail}
+
+                        </p>
+
+                    </div>
+
+                `;
+
+            });
+
+        }
+
+        // =========================
+        // LOAD EVENTS
+        // =========================
+
+        async function loadEvents(){
+
+            const response =
+                await fetch(
+
+                    `${EVENT_API}/ngo/${ngoEmail}`
+
+                );
+
+            const events =
+                await response.json();
+
+            displayEvents(
+                events.filter(
+                    belongsToSelectedNgo
+                )
+            );
+
+        }
+
+        // =========================
+        // DISPLAY EVENTS
+        // =========================
+
+        function displayEvents(events){
+
+            const container =
+                document.getElementById(
+                    "eventContainer"
+                );
+
+            container.innerHTML = "";
+
+            if(events.length === 0){
+
+                container.innerHTML =
+
+                    `<div class="empty">
+                        No events available
+                    </div>`;
+
+                return;
+
+            }
+
+            events.forEach(e => {
+
+                container.innerHTML += `
+
+                    <div class="card">
+
+                        <h2>
+                            ${e.title}
+                        </h2>
+
+                        <p>
+
+                            ${e.description}
+
+                        </p>
+
+                        <p>
+
+                            <b>Date:</b>
+                            ${e.eventDate}
+
+                        </p>
+
+                        <p>
+
+                            <b>Time:</b>
+                            ${e.eventTime}
+
+                        </p>
+
+                        <p>
+
+                            <b>Location:</b>
+                            ${e.location || 'N/A'}
+
+                        </p>
+
+                        ${e.meetingLink
+
+                            ?
+
+                            `
+
+                            <a class="meeting-btn"
+
+                               href="${e.meetingLink}"
+
+                               target="_blank">
+
+                               Join Meeting
+
+                            </a>
+
+                            `
+
+                            :
+
+                            ''
+
+                        }
+
+                    </div>
+
+                `;
+
+            });
+
+        }
+
+        // =========================
+        // LOAD POLLS
+        // =========================
+
+        async function loadPolls(){
+
+            const response =
+                await fetch(
+
+                    `${POLL_API}/ngo/${ngoEmail}`
+
+                );
+
+            const polls =
+                await response.json();
+
+            displayPolls(
+                polls.filter(
+                    belongsToSelectedNgo
+                )
+            );
+
+        }
+
+        // =========================
+        // DISPLAY POLLS
+        // =========================
+
+        function displayPolls(polls){
+
+            const container =
+                document.getElementById(
+                    "pollContainer"
+                );
+
+            container.innerHTML = "";
+
+            if(polls.length === 0){
+
+                container.innerHTML =
+
+                    `<div class="empty">
+                        No polls available
+                    </div>`;
+
+                return;
+
+            }
+
+            polls.forEach(p => {
+
+                container.innerHTML += `
+
+                    <div class="card">
+
+                        <h2>
+                            ${p.question}
+                        </h2>
+
+                        <p>
+
+                            • ${p.option1}
+
+                        </p>
+
+                        <p>
+
+                            • ${p.option2}
+
+                        </p>
+
+                        ${p.option3
+
+                            ?
+
+                            `
+
+                            <p>
+                                • ${p.option3}
+                            </p>
+
+                            `
+
+                            :
+
+                            ''
+
+                        }
+
+                        ${p.option4
+
+                            ?
+
+                            `
+
+                            <p>
+                                • ${p.option4}
+                            </p>
+
+                            `
+
+                            :
+
+                            ''
+
+                        }
+
+                    </div>
+
+                `;
+
+            });
+
+        }
+
+        // =========================
+        // INITIAL LOAD
+        // =========================
+
+        async function initialLoad(){
+
+            await loadNgoDetails();
+
+            loadAnnouncements();
+
+            loadEvents();
+
+            loadPolls();
+
+        }
+
+        initialLoad();
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Appointments</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+
+            background:#f0fdf4;
+
+            min-height:100vh;
+
+            padding:30px;
+        }
+
+        h1{
+
+            text-align:center;
+
+            color:#059669;
+
+            font-size:50px;
+
+            margin-bottom:40px;
+        }
+
+        .container{
+
+            display:grid;
+
+            gap:25px;
+
+            max-width:1000px;
+
+            margin:auto;
+        }
+
+        .card{
+
+            background:white;
+
+            padding:30px;
+
+            border-radius:20px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .card p{
+
+            margin-bottom:12px;
+
+            font-size:17px;
+
+            color:#444;
+
+            line-height:1.6;
+        }
+
+        .card a{
+
+            color:#2563eb;
+
+            text-decoration:none;
+
+            font-weight:bold;
+        }
+
+        .status{
+
+            font-weight:bold;
+
+            margin-top:10px;
+
+            font-size:18px;
+        }
+
+        .pending{
+
+            color:#f59e0b;
+        }
+
+        .accepted{
+
+            color:#10b981;
+        }
+
+        .rejected{
+
+            color:#ef4444;
+        }
+
+        .input-group{
+
+            margin-top:15px;
+        }
+
+        .input-group label{
+
+            display:block;
+
+            margin-bottom:8px;
+
+            font-weight:bold;
+        }
+
+        .input-group input,
+        .input-group textarea,
+        .input-group select{
+
+            width:100%;
+
+            padding:14px;
+
+            border-radius:12px;
+
+            border:1px solid #ddd;
+
+            font-size:15px;
+        }
+
+        textarea{
+
+            resize:none;
+
+            height:100px;
+        }
+
+        .buttons{
+
+            margin-top:20px;
+
+            display:flex;
+
+            gap:15px;
+        }
+
+        .accept-btn,
+        .reject-btn{
+
+            flex:1;
+
+            padding:14px;
+
+            border:none;
+
+            border-radius:12px;
+
+            color:white;
+
+            cursor:pointer;
+
+            font-size:16px;
+
+            transition:0.3s;
+        }
+
+        .accept-btn{
+
+            background:#10b981;
+        }
+
+        .accept-btn:hover{
+
+            background:#059669;
+        }
+
+        .reject-btn{
+
+            background:#ef4444;
+        }
+
+        .reject-btn:hover{
+
+            background:#dc2626;
+        }
+
+        .empty{
+
+            text-align:center;
+
+            font-size:22px;
+
+            color:#666;
+
+            margin-top:80px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <h1>📅 Appointment Requests</h1>
+
+    <div class="container"
+         id="container">
+
+    </div>
+
+    <script>
+
+        const API_URL =
+            "http://localhost:8081/appointment";
+
+        // =========================
+        // GET SPECIALIST EMAIL
+        // =========================
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        const specialistEmail =
+            params.get("specialistEmail");
+
+        // =========================
+        // SECURITY CHECK
+        // =========================
+
+        if(!specialistEmail){
+
+            window.location.href =
+                "specialist-login.html";
+
+        }
+
+        // =========================
+        // LOAD APPOINTMENTS
+        // =========================
+
+        async function loadAppointments(){
+
+            try{
+
+                const response =
+                    await fetch(
+
+                        `${API_URL}/specialist/${specialistEmail}`
+
+                    );
+
+                const appointments =
+                    await response.json();
+
+                const container =
+                    document.getElementById(
+                        "container"
+                    );
+
+                container.innerHTML = "";
+
+                // EMPTY
+
+                if(appointments.length === 0){
+
+                    container.innerHTML =
+
+                        `<div class="empty">
+
+                            No Appointment Requests Yet
+
+                        </div>`;
+
+                    return;
+
+                }
+
+                // LOOP
+
+                appointments.forEach(a => {
+
+                    let statusClass = "";
+
+                    if(a.status === "PENDING"){
+
+                        statusClass =
+                            "pending";
+
+                    }
+
+                    else if(a.status === "ACCEPTED"){
+
+                        statusClass =
+                            "accepted";
+
+                    }
+
+                    else{
+
+                        statusClass =
+                            "rejected";
+
+                    }
+
+                    container.innerHTML += `
+
+                        <div class="card">
+
+                            <p>
+                                <b>User Name:</b>
+                                ${a.userName}
+                            </p>
+
+                            <p>
+                                <b>User Email:</b>
+                                ${a.userEmail}
+                            </p>
+
+                            <p>
+                                <b>Preferred Timing:</b>
+                                ${a.preferredTiming}
+                            </p>
+
+                            <p>
+                                <b>Issue:</b>
+                                ${a.issue}
+                            </p>
+
+                            <p class="status ${statusClass}">
+
+                                Status :
+                                ${a.status}
+
+                            </p>
+
+                            ${
+                                a.status !== "PENDING"
+
+                                ?
+
+                                `
+
+                                <p>
+
+                                    <b>Specialist Response:</b>
+
+                                    ${a.specialistOpinion || ""}
+
+                                </p>
+
+                                <p>
+
+                                    <b>Availability:</b>
+
+                                    ${a.specialistAvailability || ""}
+
+                                </p>
+
+                                <p>
+
+                                    <b>Communication Mode:</b>
+
+                                    ${a.communicationMode || ""}
+
+                                </p>
+
+                                ${
+                                    a.communicationMode === "Online"
+
+                                    ?
+
+                                    `
+
+                                    <p>
+
+                                        <b>Meeting Link:</b>
+
+                                        <a href="${a.meetingLink}"
+                                           target="_blank">
+
+                                           Join Meeting
+
+                                        </a>
+
+                                    </p>
+
+                                    `
+
+                                    :
+
+                                    `
+
+                                    <p>
+
+                                        <b>Meeting Location:</b>
+
+                                        ${a.meetingLink || ""}
+
+                                    </p>
+
+                                    `
+                                }
+
+                                `
+
+                                :
+
+                                `
+
+                                <div class="input-group">
+
+                                    <label>
+                                        Specialist Response
+                                    </label>
+
+                                    <textarea
+                                        id="opinion-${a.id}"></textarea>
+
+                                </div>
+
+                                <div class="input-group">
+
+                                    <label>
+                                        Availability
+                                    </label>
+
+                                    <input type="text"
+
+                                           id="availability-${a.id}"
+
+                                           placeholder="Mon-Fri 6 PM">
+
+                                </div>
+
+                                <div class="input-group">
+
+                                    <label>
+                                        Communication Mode
+                                    </label>
+
+                                    <select
+                                        id="mode-${a.id}">
+
+                                        <option>
+                                            Online
+                                        </option>
+
+                                        <option>
+                                            Offline
+                                        </option>
+
+                                        <option>
+                                            Both
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+                                <div class="input-group">
+
+                                    <label>
+                                        Meeting Link / Hospital
+                                    </label>
+
+                                    <input type="text"
+
+                                           id="link-${a.id}"
+
+                                           placeholder="Google Meet / Hospital">
+
+                                </div>
+
+                                <div class="buttons">
+
+                                    <button
+
+                                        class="accept-btn"
+
+                                        onclick="acceptAppointment(${a.id})">
+
+                                        Accept
+
+                                    </button>
+
+                                    <button
+
+                                        class="reject-btn"
+
+                                        onclick="rejectAppointment(${a.id})">
+
+                                        Reject
+
+                                    </button>
+
+                                </div>
+
+                                `
+
+                            }
+
+                        </div>
+
+                    `;
+
+                });
+
+            }
+
+            catch(error){
+
+                console.log(error);
+
+            }
+
+        }
+
+        // =========================
+        // ACCEPT APPOINTMENT
+        // =========================
+
+        async function acceptAppointment(id){
+
+            const opinion =
+                document.getElementById(
+                    `opinion-${id}`
+                ).value;
+
+            const availability =
+                document.getElementById(
+                    `availability-${id}`
+                ).value;
+
+            const mode =
+                document.getElementById(
+                    `mode-${id}`
+                ).value;
+
+            const link =
+                document.getElementById(
+                    `link-${id}`
+                ).value;
+
+            await fetch(
+
+                `${API_URL}/accept/${id}`,
+
+                {
+
+                    method:"PUT",
+
+                    headers:{
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:JSON.stringify({
+
+                        specialistOpinion:
+                            opinion,
+
+                        specialistAvailability:
+                            availability,
+
+                        communicationMode:
+                            mode,
+
+                        meetingLink:
+                            link
+
+                    })
+
+                }
+
+            );
+
+            alert(
+                "Appointment Accepted"
+            );
+
+            loadAppointments();
+
+        }
+
+        // =========================
+        // REJECT APPOINTMENT
+        // =========================
+
+        async function rejectAppointment(id){
+
+            const opinion =
+                document.getElementById(
+                    `opinion-${id}`
+                ).value;
+
+            await fetch(
+
+                `${API_URL}/reject/${id}`,
+
+                {
+
+                    method:"PUT",
+
+                    headers:{
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:JSON.stringify({
+
+                        specialistOpinion:
+                            opinion
+
+                    })
+
+                }
+
+            );
+
+            alert(
+                "Appointment Rejected"
+            );
+
+            loadAppointments();
+
+        }
+
+        // =========================
+        // INITIAL LOAD
+        // =========================
+
+        loadAppointments();
+
+    </script>
+
+</body>
+
+</html>

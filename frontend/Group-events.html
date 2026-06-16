@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width,
+                   initial-scale=1.0">
+
+    <title>Group Events</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+
+            background:#fffbeb;
+
+            min-height:100vh;
+
+            padding:30px;
+        }
+
+        h1{
+
+            text-align:center;
+
+            color:#059669;
+
+            margin-bottom:35px;
+
+            font-size:42px;
+        }
+
+        .container{
+
+            max-width:1000px;
+
+            margin:auto;
+        }
+
+        .event-card{
+
+            background:white;
+
+            padding:30px;
+
+            border-radius:22px;
+
+            margin-bottom:30px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .event-type{
+
+            display:inline-block;
+
+            padding:8px 15px;
+
+            border-radius:20px;
+
+            color:white;
+
+            margin-bottom:18px;
+
+            font-size:14px;
+        }
+
+        .online{
+
+            background:#2563eb;
+        }
+
+        .offline{
+
+            background:#dc2626;
+        }
+
+        .event-card h2{
+
+            color:#059669;
+
+            margin-bottom:18px;
+        }
+
+        .event-card p{
+
+            margin-bottom:14px;
+
+            line-height:1.8;
+
+            color:#444;
+        }
+
+        .meeting-link{
+
+            display:inline-block;
+
+            margin-top:10px;
+
+            padding:12px 18px;
+
+            border-radius:12px;
+
+            background:#059669;
+
+            color:white;
+
+            text-decoration:none;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🎉 Community Events</h1>
+
+        <!-- EVENTS -->
+
+        <div id="eventContainer">
+
+        </div>
+
+    </div>
+
+    <script>
+
+        const EVENT_API =
+            "http://localhost:8081/ngo-event";
+
+        const GROUP_API =
+            "http://localhost:8081/ngo-group";
+
+        // GROUP ID
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        const groupId =
+            params.get("groupId");
+
+        const userEmail =
+            params.get("userEmail") ||
+            localStorage.getItem("userEmail") ||
+            "";
+
+        // =========================
+        // CHECK MEMBERSHIP
+        // =========================
+
+        async function hasGroupAccess(){
+
+            if(!userEmail){
+
+                return false;
+
+            }
+
+            const response =
+                await fetch(
+
+                    `${GROUP_API}/user/${encodeURIComponent(userEmail)}`
+
+                );
+
+            const groups =
+                await response.json();
+
+            return groups.some(g =>
+
+                g.groupId == groupId
+
+                &&
+
+                g.status === "APPROVED"
+
+            );
+
+        }
+
+        function showAccessDenied(){
+
+            document.getElementById(
+                "eventContainer"
+            ).innerHTML = `
+
+                <h2 style="
+                    text-align:center;
+                    color:#dc2626;
+                ">
+
+                    Join this group first to view events.
+
+                </h2>
+
+            `;
+
+        }
+
+        // =========================
+        // LOAD EVENTS
+        // =========================
+
+        async function loadEvents(){
+
+            const allowed =
+                await hasGroupAccess();
+
+            if(!allowed){
+
+                showAccessDenied();
+
+                return;
+
+            }
+
+            const response =
+                await fetch(
+
+                    `${EVENT_API}/group/${groupId}`
+
+                );
+
+            const events =
+                await response.json();
+
+            displayEvents(events);
+
+        }
+
+        // =========================
+        // DISPLAY EVENTS
+        // =========================
+
+        function displayEvents(events){
+
+            const container =
+                document.getElementById(
+                    "eventContainer"
+                );
+
+            container.innerHTML = "";
+
+            if(events.length === 0){
+
+                container.innerHTML = `
+
+                    <h2 style="
+                        text-align:center;
+                        color:#666;
+                    ">
+
+                        No Events Available
+
+                    </h2>
+
+                `;
+
+                return;
+
+            }
+
+            events.forEach(event => {
+
+                container.innerHTML += `
+
+                    <div class="event-card">
+
+                        <div class="event-type
+                            ${event.eventType === 'ONLINE'
+                                ? 'online'
+                                : 'offline'}">
+
+                            ${event.eventType}
+
+                        </div>
+
+                        <h2>
+                            ${event.title}
+                        </h2>
+
+                        <p>
+
+                            <b>Description:</b><br>
+
+                            ${event.description}
+
+                        </p>
+
+                        <p>
+
+                            <b>NGO:</b>
+
+                            ${event.ngoName}
+
+                        </p>
+
+                        <p>
+
+                            <b>Location:</b>
+
+                            ${event.location || 'N/A'}
+
+                        </p>
+
+                        <p>
+
+                            <b>Date:</b>
+
+                            ${event.eventDate}
+
+                        </p>
+
+                        <p>
+
+                            <b>Time:</b>
+
+                            ${event.eventTime}
+
+                        </p>
+
+                        ${event.meetingLink
+
+                            ?
+
+                            `
+
+                            <a href="${event.meetingLink}"
+                               target="_blank"
+                               class="meeting-link">
+
+                                Join Meeting
+
+                            </a>
+
+                            `
+
+                            :
+
+                            ''
+
+                        }
+
+                    </div>
+
+                `;
+
+            });
+
+        }
+
+        // =========================
+        // INITIAL LOAD
+        // =========================
+
+        loadEvents();
+
+    </script>
+
+</body>
+
+</html>

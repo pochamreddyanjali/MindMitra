@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>User Support</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+
+            background:#ecfdf5;
+
+            min-height:100vh;
+
+            padding:30px;
+        }
+
+        h1{
+
+            text-align:center;
+
+            color:#059669;
+
+            margin-bottom:40px;
+
+            font-size:45px;
+        }
+
+        .container{
+
+            display:grid;
+
+            grid-template-columns:
+                repeat(auto-fit,minmax(320px,1fr));
+
+            gap:25px;
+        }
+
+        .card{
+
+            background:white;
+
+            padding:25px;
+
+            border-radius:20px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+
+            transition:0.3s;
+        }
+
+        .card:hover{
+
+            transform:translateY(-8px);
+        }
+
+        .card h2{
+
+            color:#059669;
+
+            margin-bottom:15px;
+        }
+
+        .card p{
+
+            margin-bottom:10px;
+
+            color:#555;
+
+            line-height:1.6;
+        }
+
+        .chat-wrapper{
+
+            position:relative;
+
+            width:100%;
+
+            margin-top:15px;
+        }
+
+        .chat-btn{
+
+            width:100%;
+
+            padding:14px;
+
+            border:none;
+
+            border-radius:12px;
+
+            background:#2563eb;
+
+            color:white;
+
+            font-size:16px;
+
+            cursor:pointer;
+
+            transition:0.3s;
+        }
+
+        .chat-btn:hover{
+
+            background:#1d4ed8;
+        }
+
+        .badge{
+
+            position:absolute;
+
+            top:-8px;
+
+            right:-8px;
+
+            background:red;
+
+            color:white;
+
+            border-radius:50%;
+
+            min-width:24px;
+
+            height:24px;
+
+            display:flex;
+
+            align-items:center;
+
+            justify-content:center;
+
+            font-size:12px;
+
+            font-weight:bold;
+        }
+
+        .empty{
+
+            text-align:center;
+
+            margin-top:100px;
+
+            color:#666;
+
+            font-size:24px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <h1>🤝 Accepted Users</h1>
+
+    <div class="container"
+         id="container">
+
+    </div>
+
+    <script>
+
+        const API_URL =
+            "http://localhost:8081/appointment";
+
+        const MESSAGE_API =
+            "http://localhost:8081/message";
+
+        // =========================
+        // GET SPECIALIST EMAIL
+        // =========================
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        const specialistEmail =
+            params.get("specialistEmail");
+
+        // =========================
+        // SECURITY CHECK
+        // =========================
+
+        if(!specialistEmail){
+
+            window.location.href =
+                "specialist-login.html";
+
+        }
+
+        // =========================
+        // LOAD ACCEPTED USERS
+        // =========================
+
+        async function loadAcceptedUsers(){
+
+            try{
+
+                const response =
+                    await fetch(
+
+                        `${API_URL}/accepted/${specialistEmail}`
+
+                    );
+
+                const users =
+                    await response.json();
+
+                const container =
+                    document.getElementById(
+                        "container"
+                    );
+
+                container.innerHTML = "";
+
+                // EMPTY
+
+                if(users.length === 0){
+
+                    container.innerHTML =
+
+                        `<div class="empty">
+
+                            No Accepted Users Yet
+
+                        </div>`;
+
+                    return;
+
+                }
+
+                // LOOP USERS
+
+                for(const user of users){
+
+                    // =========================
+                    // UNREAD COUNT
+                    // =========================
+
+                    const unreadResponse =
+                        await fetch(
+
+                            `${MESSAGE_API}/unread-between?sender=${user.userEmail}&receiver=${specialistEmail}`
+
+                        );
+
+                    const unreadCount =
+                        await unreadResponse.text();
+
+                    container.innerHTML += `
+
+                        <div class="card">
+
+                            <h2>
+
+                                ${user.userName}
+
+                            </h2>
+
+                            <p>
+
+                                <b>Email:</b>
+
+                                ${user.userEmail}
+
+                            </p>
+
+                            <p>
+
+                                <b>Preferred Timing:</b>
+
+                                ${user.preferredTiming}
+
+                            </p>
+
+                            <p>
+
+                                <b>Issue:</b>
+
+                                ${user.issue}
+
+                            </p>
+
+                            <div class="chat-wrapper">
+
+                                <button
+
+                                    class="chat-btn"
+
+                                    onclick="openChat(
+                                        '${specialistEmail}',
+                                        '${user.userEmail}',
+                                        '${user.userName}'
+                                    )">
+
+                                    Open Chat
+
+                                </button>
+
+                                ${
+                                    unreadCount > 0
+
+                                    ?
+
+                                    `
+
+                                    <span class="badge">
+
+                                        ${unreadCount}
+
+                                    </span>
+
+                                    `
+
+                                    :
+
+                                    ""
+
+                                }
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+
+            }
+
+            catch(error){
+
+                console.log(error);
+
+            }
+
+        }
+
+        // =========================
+        // OPEN CHAT
+        // =========================
+
+        function openChat(
+
+            sender,
+
+            receiver,
+
+            name
+
+        ){
+
+            window.location.href =
+
+            `chat.html?sender=${sender}&receiver=${receiver}&name=${name}`;
+
+        }
+
+        // =========================
+        // AUTO REFRESH
+        // =========================
+
+        setInterval(() => {
+
+            loadAcceptedUsers();
+
+        },3000);
+
+        // =========================
+        // INITIAL LOAD
+        // =========================
+
+        loadAcceptedUsers();
+
+    </script>
+
+</body>
+
+</html>

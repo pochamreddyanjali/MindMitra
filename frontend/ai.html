@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MindMitra AI Test</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, sans-serif;
+        }
+
+        body{
+
+            height:100vh;
+
+            display:flex;
+            justify-content:center;
+            align-items:center;
+
+            background-image:url("images/aibackground.webp");
+
+            background-size:cover;
+            background-position:center;
+
+        }
+
+        .chat-container{
+
+            width:400px;
+
+            padding:30px;
+
+            border-radius:20px;
+
+            background:rgba(255,255,255,0.15);
+
+            backdrop-filter:blur(12px);
+
+            box-shadow:0 8px 32px rgba(0,0,0,0.3);
+
+            border:1px solid rgba(255,255,255,0.2);
+
+            color:white;
+
+        }
+
+        h1{
+
+            text-align:center;
+            margin-bottom:25px;
+
+        }
+
+        .input-area{
+
+            display:flex;
+            gap:10px;
+
+        }
+
+        input{
+
+            flex:1;
+
+            padding:12px;
+
+            border:none;
+
+            border-radius:10px;
+
+            outline:none;
+
+            background:rgba(255,255,255,0.2);
+
+            color:white;
+
+            font-size:16px;
+
+        }
+
+        input::placeholder{
+
+            color:#eee;
+
+        }
+
+        button{
+
+            padding:12px 18px;
+
+            border:none;
+
+            border-radius:10px;
+
+            background:#00b894;
+
+            color:white;
+
+            font-size:16px;
+
+            cursor:pointer;
+
+            transition:0.3s;
+
+        }
+
+        button:hover{
+
+            background:#019875;
+
+        }
+#response{
+
+    margin-top:20px;
+
+    padding:20px;
+
+    height:500px;
+
+    overflow-y:auto;
+
+    overflow-x:hidden;
+
+    word-wrap:break-word;
+
+    white-space:pre-wrap;
+
+    border-radius:20px;
+
+    background:rgba(255,255,255,0.15);
+
+    backdrop-filter:blur(10px);
+
+    color:white;
+
+    line-height:1.8;
+
+}
+
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="chat-container">
+
+        <h1>MindMitra AI</h1>
+
+        <div class="input-area">
+
+            <input type="text"
+                   id="message"
+                   placeholder="Share your feelings...">
+
+            <button onclick="sendMessage()">
+                Send
+            </button>
+
+        </div>
+
+        <p id="response"></p>
+
+    </div>
+
+    <script>
+
+        async function sendMessage() {
+
+            const message =
+                document.getElementById("message").value;
+
+            const response =
+                await fetch("http://localhost:8081/ai/chat", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "text/plain"
+                    },
+
+                    body: message
+
+                });
+
+            const data =
+                await response.text();
+
+            document.getElementById("response").innerText =
+                data;
+
+        }
+
+    </script>
+
+</body>
+</html>

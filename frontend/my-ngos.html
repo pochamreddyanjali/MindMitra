@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width,
+                   initial-scale=1.0">
+
+    <title>My NGOs</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+
+            background:#fefce8;
+
+            min-height:100vh;
+
+            padding:30px;
+        }
+
+        h1{
+
+            text-align:center;
+
+            color:#ca8a04;
+
+            font-size:50px;
+
+            margin-bottom:15px;
+        }
+
+        .subtitle{
+
+            text-align:center;
+
+            color:#666;
+
+            margin-bottom:40px;
+
+            font-size:18px;
+        }
+
+        .container{
+
+            display:grid;
+
+            grid-template-columns:
+                repeat(auto-fit,minmax(320px,1fr));
+
+            gap:25px;
+        }
+
+        .card{
+
+            background:white;
+
+            padding:25px;
+
+            border-radius:20px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+
+            transition:0.3s;
+        }
+
+        .card:hover{
+
+            transform:translateY(-8px);
+        }
+
+        .icon{
+
+            font-size:60px;
+
+            margin-bottom:20px;
+        }
+
+        .card h2{
+
+            color:#ca8a04;
+
+            margin-bottom:15px;
+        }
+
+        .card p{
+
+            margin-bottom:10px;
+
+            color:#555;
+
+            line-height:1.7;
+        }
+
+        .button-group{
+
+            display:flex;
+
+            gap:12px;
+
+            margin-top:18px;
+
+            flex-wrap:wrap;
+        }
+
+        .btn{
+
+            flex:1;
+
+            padding:14px;
+
+            border:none;
+
+            border-radius:12px;
+
+            color:white;
+
+            cursor:pointer;
+
+            font-size:15px;
+        }
+
+        .updates{
+
+            background:#2563eb;
+        }
+
+        .groups{
+
+            background:#7c3aed;
+        }
+
+        .leave{
+
+            background:#dc2626;
+        }
+
+        .empty{
+
+            text-align:center;
+
+            margin-top:100px;
+
+            font-size:24px;
+
+            color:#666;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <!-- TITLE -->
+
+    <h1>🤝 My NGOs</h1>
+
+    <p class="subtitle">
+
+        NGOs you joined for support,
+        wellness and community activities
+
+    </p>
+
+    <!-- NGO LIST -->
+
+    <div class="container"
+         id="ngoContainer">
+
+    </div>
+
+    <!-- EMPTY -->
+
+    <div class="empty"
+         id="emptyMessage"
+         style="display:none;">
+
+        No NGOs Joined Yet
+
+    </div>
+
+    <script>
+
+        const FOLLOW_API =
+            "http://localhost:8081/ngo-follower";
+
+        // =========================
+        // USER EMAIL
+        // =========================
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        const userEmail =
+            params.get("userEmail");
+
+        // =========================
+        // LOAD JOINED NGOs
+        // =========================
+
+        async function loadMyNgos(){
+
+            const response =
+                await fetch(
+
+                    `${FOLLOW_API}/user/${userEmail}`
+
+                );
+
+            const ngos =
+                await response.json();
+
+            displayNgos(ngos);
+
+        }
+
+        // =========================
+        // DISPLAY NGOs
+        // =========================
+
+        function displayNgos(ngos){
+
+            const container =
+                document.getElementById(
+                    "ngoContainer"
+                );
+
+            const empty =
+                document.getElementById(
+                    "emptyMessage"
+                );
+
+            container.innerHTML = "";
+
+            if(ngos.length === 0){
+
+                empty.style.display =
+                    "block";
+
+                return;
+
+            }
+
+            empty.style.display =
+                "none";
+
+            ngos.forEach(n => {
+
+                container.innerHTML += `
+
+                    <div class="card">
+
+                        <div class="icon">
+                            🤝
+                        </div>
+
+                        <h2>
+                            ${n.name}
+                        </h2>
+
+                        <p>
+
+                            <b>Email:</b>
+                            ${n.email}
+
+                        </p>
+
+                        <p>
+
+                            <b>Phone:</b>
+                            ${n.phone}
+
+                        </p>
+
+                        <p>
+
+                            <b>Address:</b>
+                            ${n.address}
+
+                        </p>
+
+                        <p>
+
+                            <b>Description:</b><br>
+
+                            ${n.description}
+
+                        </p>
+
+                        <div class="button-group">
+
+                            <!-- NGO UPDATES -->
+
+                            <button class="btn updates"
+
+                                onclick="
+                                openUpdates(
+                                    '${n.email}'
+                                )">
+
+                                Updates
+
+                            </button>
+
+                            <!-- GROUPS -->
+
+                            <button class="btn groups"
+
+                                onclick="
+                                openGroups()
+                                ">
+
+                                Groups
+
+                            </button>
+
+                            <!-- LEAVE NGO -->
+
+                            <button class="btn leave"
+
+                                onclick="
+                                leaveNgo(
+                                    '${n.email}'
+                                )">
+
+                                Leave
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            });
+
+        }
+
+        // =========================
+        // OPEN NGO UPDATES
+        // =========================
+
+        function openUpdates(ngoEmail){
+
+            window.location.href =
+
+                `ngo-updates.html?userEmail=${userEmail}&ngoEmail=${ngoEmail}`;
+
+        }
+
+        // =========================
+        // OPEN GROUPS
+        // =========================
+
+        function openGroups(){
+
+            window.location.href =
+                "groups.html";
+
+        }
+
+        // =========================
+        // LEAVE NGO
+        // =========================
+
+        async function leaveNgo(ngoEmail){
+
+            const confirmLeave =
+                confirm(
+                    "Leave this NGO?"
+                );
+
+            if(!confirmLeave){
+
+                return;
+
+            }
+
+            await fetch(
+
+                `${FOLLOW_API}/leave`,
+
+                {
+
+                    method:"DELETE",
+
+                    headers:{
+                        "Content-Type":
+                        "application/json"
+                    },
+
+                    body:JSON.stringify({
+
+                        userEmail,
+
+                        ngoEmail
+
+                    })
+
+                }
+
+            );
+
+            alert("Left NGO");
+
+            loadMyNgos();
+
+        }
+
+        // =========================
+        // INITIAL LOAD
+        // =========================
+
+        loadMyNgos();
+
+    </script>
+
+</body>
+
+</html>

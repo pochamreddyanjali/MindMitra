@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindMitra Bubble Relaxation</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+
+            overflow:hidden;
+
+            height:100vh;
+
+            background:linear-gradient(to bottom,#bfdbfe,#dbeafe,#eff6ff);
+
+            position:relative;
+        }
+
+        h1{
+
+            position:absolute;
+
+            top:20px;
+
+            width:100%;
+
+            text-align:center;
+
+            color:#2563eb;
+
+            font-size:45px;
+
+            z-index:10;
+        }
+
+        .subtitle{
+
+            position:absolute;
+
+            top:80px;
+
+            width:100%;
+
+            text-align:center;
+
+            color:#555;
+
+            font-size:20px;
+
+            z-index:10;
+        }
+
+        .score{
+
+            position:absolute;
+
+            top:20px;
+
+            right:30px;
+
+            background:white;
+
+            padding:15px 25px;
+
+            border-radius:15px;
+
+            box-shadow:0 4px 10px rgba(0,0,0,0.15);
+
+            font-size:22px;
+
+            color:#2563eb;
+
+            font-weight:bold;
+
+            z-index:10;
+        }
+
+        .best-score{
+
+            position:absolute;
+
+            top:90px;
+
+            right:30px;
+
+            background:white;
+
+            padding:15px 25px;
+
+            border-radius:15px;
+
+            box-shadow:0 4px 10px rgba(0,0,0,0.15);
+
+            font-size:20px;
+
+            color:#16a34a;
+
+            font-weight:bold;
+
+            z-index:10;
+        }
+
+        .timer{
+
+            position:absolute;
+
+            top:20px;
+
+            left:30px;
+
+            background:white;
+
+            padding:15px 25px;
+
+            border-radius:15px;
+
+            box-shadow:0 4px 10px rgba(0,0,0,0.15);
+
+            font-size:22px;
+
+            color:#2563eb;
+
+            font-weight:bold;
+
+            z-index:10;
+        }
+
+        .bubble{
+
+            position:absolute;
+
+            bottom:-100px;
+
+            border-radius:50%;
+
+            cursor:pointer;
+
+            animation:floatUp linear forwards;
+
+            opacity:0.85;
+
+            transition:transform 0.2s;
+        }
+
+        .bubble:hover{
+
+            transform:scale(1.1);
+        }
+
+        @keyframes floatUp{
+
+            from{
+                transform:translateY(0);
+            }
+
+            to{
+                transform:translateY(-120vh);
+            }
+        }
+
+        .popup{
+
+            position:absolute;
+
+            font-size:30px;
+
+            animation:popFade 1s forwards;
+
+            pointer-events:none;
+        }
+
+        @keyframes popFade{
+
+            0%{
+                opacity:1;
+                transform:scale(1);
+            }
+
+            100%{
+                opacity:0;
+                transform:translateY(-50px) scale(1.8);
+            }
+        }
+
+        .game-over{
+
+            position:absolute;
+
+            top:50%;
+
+            left:50%;
+
+            transform:translate(-50%,-50%);
+
+            background:white;
+
+            padding:40px;
+
+            border-radius:25px;
+
+            box-shadow:0 4px 20px rgba(0,0,0,0.2);
+
+            text-align:center;
+
+            display:none;
+
+            z-index:100;
+        }
+
+        .game-over h2{
+
+            color:#2563eb;
+
+            margin-bottom:20px;
+
+            font-size:40px;
+        }
+
+        .game-over p{
+
+            font-size:25px;
+
+            margin-bottom:20px;
+        }
+
+        .game-over button{
+
+            padding:15px 30px;
+
+            border:none;
+
+            border-radius:10px;
+
+            background:#2563eb;
+
+            color:white;
+
+            font-size:18px;
+
+            cursor:pointer;
+        }
+
+        .history{
+
+            margin-top:20px;
+
+            max-height:150px;
+
+            overflow-y:auto;
+
+            text-align:left;
+        }
+
+        .history-item{
+
+            background:#dbeafe;
+
+            padding:10px;
+
+            border-radius:10px;
+
+            margin-top:10px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <h1>🫧 Bubble Relaxation</h1>
+
+    <div class="subtitle">
+        Pop bubbles and relax your mind 🌿
+    </div>
+
+    <div class="score" id="score">
+        Score: 0
+    </div>
+
+    <div class="best-score" id="bestScore">
+        Best: 0
+    </div>
+
+    <div class="timer" id="timer">
+        Time: 30
+    </div>
+
+    <!-- GAME OVER -->
+
+    <div class="game-over" id="gameOver">
+
+        <h2>✨ Relaxation Complete ✨</h2>
+
+        <p id="finalScore"></p>
+
+        <div class="history" id="history">
+
+        </div>
+
+        <button onclick="restartGame()">
+            Play Again
+        </button>
+
+    </div>
+
+    <script>
+
+        const API_URL = "http://localhost:8081/game";
+
+        let score = 0;
+
+        let timeLeft = 30;
+
+        let gameRunning = true;
+
+        const userId = localStorage.getItem("userId");
+
+        const gameName = "Bubble Game";
+
+        const colors = [
+
+            "#60a5fa",
+            "#34d399",
+            "#f9a8d4",
+            "#fcd34d",
+            "#a78bfa",
+            "#fca5a5"
+
+        ];
+
+        // LOAD BEST SCORE
+
+        async function loadBestScore(){
+
+            try{
+
+                const response =
+                    await fetch(
+                        `${API_URL}/best/${userId}/${encodeURIComponent(gameName)}`
+                    );
+
+                const best = await response.text();
+
+                document.getElementById("bestScore").innerText =
+                    "Best: " + best;
+
+            }
+
+            catch(error){
+
+                console.log(error);
+
+            }
+
+        }
+
+        // LOAD HISTORY
+
+        async function loadHistory(){
+
+            try{
+
+                const response =
+                    await fetch(
+                        `${API_URL}/history/${userId}/${encodeURIComponent(gameName)}`
+                    );
+
+                const scores = await response.json();
+
+                const history =
+                    document.getElementById("history");
+
+                history.innerHTML =
+                    "<h3>Previous Scores</h3>";
+
+                scores.reverse().forEach(item => {
+
+                    history.innerHTML += `
+
+                        <div class="history-item">
+
+                            Score: ${item.score}
+
+                        </div>
+
+                    `;
+
+                });
+
+            }
+
+            catch(error){
+
+                console.log(error);
+
+            }
+
+        }
+
+        // CREATE BUBBLES
+
+        function createBubble(){
+
+            if(!gameRunning) return;
+
+            const bubble =
+                document.createElement("div");
+
+            bubble.classList.add("bubble");
+
+            const size =
+                Math.random() * 80 + 40;
+
+            bubble.style.width = size + "px";
+
+            bubble.style.height = size + "px";
+
+            bubble.style.left =
+                Math.random() * window.innerWidth + "px";
+
+            bubble.style.background =
+                colors[Math.floor(Math.random()*colors.length)];
+
+            bubble.style.animationDuration =
+                (Math.random() * 5 + 5) + "s";
+
+            document.body.appendChild(bubble);
+
+            bubble.addEventListener("click", () => {
+
+                score++;
+
+                document.getElementById("score").innerText =
+                    "Score: " + score;
+
+                createPopup(
+                    bubble.offsetLeft,
+                    bubble.offsetTop
+                );
+
+                bubble.remove();
+
+            });
+
+            setTimeout(() => {
+
+                bubble.remove();
+
+            },10000);
+
+        }
+
+        // POPUP EFFECT
+
+        function createPopup(x,y){
+
+            const popup =
+                document.createElement("div");
+
+            popup.classList.add("popup");
+
+            popup.innerText = "✨";
+
+            popup.style.left = x + "px";
+
+            popup.style.top = y + "px";
+
+            document.body.appendChild(popup);
+
+            setTimeout(() => {
+
+                popup.remove();
+
+            },1000);
+
+        }
+
+        // TIMER
+
+        function startTimer(){
+
+            const timerInterval =
+                setInterval(() => {
+
+                timeLeft--;
+
+                document.getElementById("timer").innerText =
+                    "Time: " + timeLeft;
+
+                if(timeLeft <= 0){
+
+                    clearInterval(timerInterval);
+
+                    endGame();
+
+                }
+
+            },1000);
+
+        }
+
+        // END GAME
+
+        async function endGame(){
+
+            gameRunning = false;
+
+            document.getElementById("finalScore").innerText =
+                "Your Relaxation Score: " + score;
+
+            document.getElementById("gameOver").style.display =
+                "block";
+
+            // OLD BEST SCORE
+
+            const oldBest =
+                parseInt(
+                    document.getElementById("bestScore")
+                    .innerText.replace("Best: ","")
+                );
+
+            try{
+
+                await fetch(`${API_URL}/save`,{
+
+                    method:"POST",
+
+                    headers:{
+                        "Content-Type":"application/json"
+                    },
+
+                    body:JSON.stringify({
+
+                        gameName:gameName,
+                        score:score,
+                        userId:userId
+
+                    })
+
+                });
+
+                await loadBestScore();
+
+                await loadHistory();
+
+                // CELEBRATION
+
+                if(score > oldBest){
+
+                    celebrateNewBest();
+
+                }
+
+            }
+
+            catch(error){
+
+                console.log(error);
+
+            }
+
+        }
+
+        // RESTART
+
+        function restartGame(){
+
+            location.reload();
+
+        }
+
+        // CELEBRATION FUNCTION
+
+        function celebrateNewBest(){
+
+            for(let i = 0; i < 100; i++){
+
+                const confetti =
+                    document.createElement("div");
+
+                confetti.innerHTML =
+                    ["🎉","✨","🎊","🌟"]
+                    [Math.floor(Math.random()*2)];
+
+                confetti.style.position =
+                    "absolute";
+
+                confetti.style.left =
+                    Math.random() *
+                    window.innerWidth + "px";
+
+                confetti.style.top =
+                    "-50px";
+
+                confetti.style.fontSize =
+                    (Math.random()*30 + 20) + "px";
+
+                confetti.style.zIndex =
+                    "9999";
+
+                confetti.style.transition =
+                    "all 3s linear";
+
+                document.body.appendChild(confetti);
+
+                setTimeout(() => {
+
+                    confetti.style.top =
+                        window.innerHeight + "px";
+
+                    confetti.style.transform =
+                        `rotate(${Math.random()*720}deg)`;
+
+                },50);
+
+                setTimeout(() => {
+
+                    confetti.remove();
+
+                },3000);
+
+            }
+
+            // MESSAGE
+
+            const message =
+                document.createElement("div");
+
+            message.innerHTML =
+                "🏆 NEW BEST SCORE! 🎉";
+
+            message.style.position =
+                "absolute";
+
+            message.style.top =
+                "30%";
+
+            message.style.left =
+                "50%";
+
+            message.style.transform =
+                "translate(-50%,-50%)";
+
+            message.style.background =
+                "white";
+
+            message.style.padding =
+                "25px 45px";
+
+            message.style.borderRadius =
+                "20px";
+
+            message.style.fontSize =
+                "40px";
+
+            message.style.fontWeight =
+                "bold";
+
+            message.style.color =
+                "#2563eb";
+
+            message.style.zIndex =
+                "10000";
+
+            message.style.boxShadow =
+                "0 4px 20px rgba(0,0,0,0.2)";
+
+            document.body.appendChild(message);
+
+            setTimeout(() => {
+
+                message.remove();
+
+            },3000);
+
+        }
+
+        // START GAME
+
+        setInterval(createBubble,700);
+
+        startTimer();
+
+        loadBestScore();
+
+    </script>
+
+</body>
+</html>

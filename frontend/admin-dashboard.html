@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>MindMitra Admin Dashboard</title>
+
+    <style>
+
+        *{
+
+            margin:0;
+
+            padding:0;
+
+            box-sizing:border-box;
+
+            font-family:Arial, Helvetica, sans-serif;
+
+        }
+
+        body{
+
+            background:#f3f4f6;
+
+            min-height:100vh;
+
+            padding:30px;
+
+        }
+
+        h1{
+
+            text-align:center;
+
+            color:#dc2626;
+
+            margin-bottom:10px;
+
+            font-size:50px;
+
+        }
+
+        .subtitle{
+
+            text-align:center;
+
+            color:#666;
+
+            margin-bottom:40px;
+
+            font-size:20px;
+
+        }
+
+        .section{
+
+            margin-bottom:50px;
+
+        }
+
+        .section-title{
+
+            font-size:35px;
+
+            color:#1e3a8a;
+
+            margin-bottom:25px;
+
+        }
+
+        .container{
+
+            display:grid;
+
+            grid-template-columns:
+                repeat(auto-fit,minmax(320px,1fr));
+
+            gap:25px;
+        }
+
+        .card{
+
+            background:white;
+
+            padding:25px;
+
+            border-radius:20px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+
+        }
+
+        .card h2{
+
+            color:#2563eb;
+
+            margin-bottom:10px;
+        }
+
+        .card p{
+
+            margin-bottom:10px;
+
+            color:#555;
+
+            line-height:1.6;
+        }
+
+        .status{
+
+            display:inline-block;
+
+            padding:8px 15px;
+
+            border-radius:20px;
+
+            background:#fef3c7;
+
+            color:#92400e;
+
+            font-weight:bold;
+
+            margin-bottom:15px;
+        }
+
+        .buttons{
+
+            display:flex;
+
+            gap:15px;
+
+            margin-top:20px;
+        }
+
+        button{
+
+            flex:1;
+
+            padding:12px;
+
+            border:none;
+
+            border-radius:10px;
+
+            color:white;
+
+            cursor:pointer;
+
+            font-size:16px;
+
+            transition:0.3s;
+        }
+
+        .approve{
+
+            background:#10b981;
+        }
+
+        .approve:hover{
+
+            background:#059669;
+        }
+
+        .reject{
+
+            background:#ef4444;
+        }
+
+        .reject:hover{
+
+            background:#dc2626;
+        }
+
+        .logout{
+
+            position:fixed;
+
+            top:20px;
+
+            right:20px;
+
+            background:#111827;
+
+            padding:12px 20px;
+
+            border-radius:10px;
+        }
+
+        .logout:hover{
+
+            background:black;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <!-- LOGOUT -->
+
+    <button class="logout"
+            onclick="logoutAdmin()">
+
+        Logout
+
+    </button>
+
+    <!-- TITLE -->
+
+    <h1>🛡️ Admin Dashboard</h1>
+
+    <p class="subtitle">
+        Manage specialists and NGO approvals
+    </p>
+
+    <!-- SPECIALISTS -->
+
+    <div class="section">
+
+        <div class="section-title">
+            Pending Specialists
+        </div>
+
+        <div class="container"
+             id="specialistContainer">
+
+        </div>
+
+    </div>
+
+    <!-- NGOs -->
+
+    <div class="section">
+
+        <div class="section-title">
+            Pending NGOs
+        </div>
+
+        <div class="container"
+             id="ngoContainer">
+
+        </div>
+
+    </div>
+
+    <!-- ADMIN FEATURES -->
+
+    <div class="section">
+
+        <div class="section-title">
+            Admin Controls
+        </div>
+
+        <div class="container">
+
+            <!-- ANALYTICS -->
+
+            <div class="card">
+
+                <h2>📊 Analytics</h2>
+
+                <p>
+
+                    View approvals,
+                    rejections and platform statistics.
+
+                </p>
+
+                <div class="buttons">
+
+                    <button class="approve"
+                            onclick="openAnalytics()">
+
+                        Open
+
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- NGO GROUPS -->
+
+            <div class="card">
+
+                <h2>👥 NGO Groups</h2>
+
+                <p>
+
+                    Monitor NGO communities,
+                    events and public groups.
+
+                </p>
+
+                <div class="buttons">
+
+                    <button class="approve"
+                            onclick="openGroups()">
+
+                        Open
+
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- CHAT MONITOR -->
+
+            <div class="card">
+
+                <h2>💬 Chat Monitor</h2>
+
+                <p>
+
+                    Monitor NGO-user
+                    communications and reports.
+
+                </p>
+
+                <div class="buttons">
+
+                    <button class="approve"
+                            onclick="openChats()">
+
+                        Open
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        const API_URL =
+            "http://localhost:8081/admin";
+
+        // =========================
+        // LOAD PENDING SPECIALISTS
+        // =========================
+
+        async function loadSpecialists(){
+
+            const response =
+                await fetch(
+                    `${API_URL}/pending-specialists`
+                );
+
+            const specialists =
+                await response.json();
+
+            const container =
+                document.getElementById(
+                    "specialistContainer"
+                );
+
+            container.innerHTML = "";
+
+            specialists.forEach(s => {
+
+                container.innerHTML += `
+
+                    <div class="card">
+
+                        <div class="status">
+                            ${s.status}
+                        </div>
+
+                        <h2>${s.name}</h2>
+
+                        <p>
+                            <b>Email:</b>
+                            ${s.email}
+                        </p>
+
+                        <p>
+                            <b>Phone:</b>
+                            ${s.phone}
+                        </p>
+
+                        <p>
+                            <b>Specialization:</b>
+                            ${s.specialization}
+                        </p>
+
+                        <p>
+                            <b>Qualification:</b>
+                            ${s.qualification}
+                        </p>
+
+                        <p>
+                            <b>Experience:</b>
+                            ${s.experience}
+                        </p>
+
+                        <div class="buttons">
+
+                            <button class="approve"
+                                onclick="approveSpecialist(${s.id})">
+
+                                Approve
+
+                            </button>
+
+                            <button class="reject"
+                                onclick="rejectSpecialist(${s.id})">
+
+                                Reject
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            });
+
+        }
+
+        // =========================
+        // LOAD NGOs
+        // =========================
+
+        async function loadNgos(){
+
+            const response =
+                await fetch(
+                    `${API_URL}/pending-ngos`
+                );
+
+            const ngos =
+                await response.json();
+
+            const container =
+                document.getElementById(
+                    "ngoContainer"
+                );
+
+            container.innerHTML = "";
+
+            ngos.forEach(n => {
+
+                container.innerHTML += `
+
+                    <div class="card">
+
+                        <div class="status">
+                            ${n.status}
+                        </div>
+
+                        <h2>${n.name}</h2>
+
+                        <p>
+                            <b>Email:</b>
+                            ${n.email}
+                        </p>
+
+                        <p>
+                            <b>Phone:</b>
+                            ${n.phone}
+                        </p>
+
+                        <p>
+                            <b>Address:</b>
+                            ${n.address}
+                        </p>
+
+                        <p>
+                            <b>Description:</b>
+                            ${n.description}
+                        </p>
+
+                        <div class="buttons">
+
+                            <button class="approve"
+                                onclick="approveNgo(${n.id})">
+
+                                Approve
+
+                            </button>
+
+                            <button class="reject"
+                                onclick="rejectNgo(${n.id})">
+
+                                Reject
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            });
+
+        }
+
+        // =========================
+        // APPROVE SPECIALIST
+        // =========================
+
+        async function approveSpecialist(id){
+
+            await fetch(
+
+                `${API_URL}/approve-specialist/${id}`,
+
+                {
+                    method:"PUT"
+                }
+
+            );
+
+            alert("Specialist Approved");
+
+            loadSpecialists();
+
+        }
+
+        // =========================
+        // REJECT SPECIALIST
+        // =========================
+
+        async function rejectSpecialist(id){
+
+            const reason =
+                prompt(
+                    "Enter rejection reason"
+                );
+
+            if(!reason) return;
+
+            await fetch(
+
+                `${API_URL}/reject-specialist/${id}`,
+
+                {
+
+                    method:"PUT",
+
+                    headers:{
+                        "Content-Type":"application/json"
+                    },
+
+                    body:JSON.stringify({
+
+                        reason
+
+                    })
+
+                }
+
+            );
+
+            alert("Specialist Rejected");
+
+            loadSpecialists();
+
+        }
+
+        // =========================
+        // APPROVE NGO
+        // =========================
+
+        async function approveNgo(id){
+
+            await fetch(
+
+                `${API_URL}/approve-ngo/${id}`,
+
+                {
+                    method:"PUT"
+                }
+
+            );
+
+            alert("NGO Approved");
+
+            loadNgos();
+
+        }
+
+        // =========================
+        // REJECT NGO
+        // =========================
+
+        async function rejectNgo(id){
+
+            const reason =
+                prompt(
+                    "Enter rejection reason"
+                );
+
+            if(!reason) return;
+
+            await fetch(
+
+                `${API_URL}/reject-ngo/${id}`,
+
+                {
+
+                    method:"PUT",
+
+                    headers:{
+                        "Content-Type":"application/json"
+                    },
+
+                    body:JSON.stringify({
+
+                        reason
+
+                    })
+
+                }
+
+            );
+
+            alert("NGO Rejected");
+
+            loadNgos();
+
+        }
+
+        // =========================
+        // OPEN ANALYTICS
+        // =========================
+
+        function openAnalytics(){
+
+            window.location.href =
+                "analytics.html";
+
+        }
+
+        // =========================
+        // OPEN NGO GROUPS
+        // =========================
+
+        function openGroups(){
+
+            window.location.href =
+                "groups.html";
+
+        }
+
+        // =========================
+        // OPEN CHATS
+        // =========================
+
+        function openChats(){
+
+            window.location.href =
+                "admin-chat-monitor.html";
+
+        }
+
+        // =========================
+        // LOGOUT
+        // =========================
+
+        function logoutAdmin(){
+
+            localStorage.removeItem(
+                "adminEmail"
+            );
+
+            window.location.href =
+                "admin-login.html";
+
+        }
+
+        // =========================
+        // INITIAL LOAD
+        // =========================
+
+        loadSpecialists();
+
+        loadNgos();
+
+    </script>
+
+</body>
+</html>

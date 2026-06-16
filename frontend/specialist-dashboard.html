@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>MindMitra Specialist Dashboard</title>
+
+    <style>
+
+        *{
+
+            margin:0;
+
+            padding:0;
+
+            box-sizing:border-box;
+
+            font-family:Arial, Helvetica, sans-serif;
+
+        }
+
+        body{
+
+            background:#f0fdf4;
+
+            min-height:100vh;
+
+            padding:30px;
+
+        }
+
+        .top-bar{
+
+            display:flex;
+
+            justify-content:space-between;
+
+            align-items:center;
+
+            margin-bottom:40px;
+
+            flex-wrap:wrap;
+
+            gap:20px;
+        }
+
+        h1{
+
+            color:#059669;
+
+            font-size:45px;
+
+        }
+
+        .logout-btn{
+
+            padding:14px 24px;
+
+            border:none;
+
+            border-radius:12px;
+
+            background:#dc2626;
+
+            color:white;
+
+            cursor:pointer;
+
+            font-size:16px;
+
+            transition:0.3s;
+        }
+
+        .logout-btn:hover{
+
+            background:#b91c1c;
+        }
+
+        .welcome{
+
+            background:white;
+
+            padding:30px;
+
+            border-radius:20px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+
+            margin-bottom:35px;
+        }
+
+        .welcome h2{
+
+            color:#2563eb;
+
+            margin-bottom:10px;
+        }
+
+        .welcome p{
+
+            color:#555;
+
+            line-height:1.7;
+
+            font-size:18px;
+        }
+
+        .cards{
+
+            display:grid;
+
+            grid-template-columns:
+                repeat(auto-fit,minmax(280px,1fr));
+
+            gap:25px;
+        }
+
+        .card{
+
+            background:white;
+
+            padding:30px;
+
+            border-radius:20px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+
+            transition:0.3s;
+
+            cursor:pointer;
+        }
+
+        .card:hover{
+
+            transform:translateY(-8px);
+
+            box-shadow:0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .icon{
+
+            font-size:60px;
+
+            margin-bottom:20px;
+        }
+
+        .card h3{
+
+            color:#059669;
+
+            margin-bottom:15px;
+
+            font-size:28px;
+        }
+
+        .card p{
+
+            color:#555;
+
+            line-height:1.6;
+
+            font-size:17px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <!-- TOP BAR -->
+
+    <div class="top-bar">
+
+        <h1>🩺 Specialist Dashboard</h1>
+
+        <button class="logout-btn"
+                onclick="logoutSpecialist()">
+
+            Logout
+
+        </button>
+
+    </div>
+
+    <!-- WELCOME -->
+
+    <div class="welcome">
+
+        <h2 id="welcomeText">
+            Welcome Specialist
+        </h2>
+
+        <p>
+
+            Thank you for joining MindMitra 🌿
+
+            Here you can manage your wellness services,
+            connect with users, provide emotional support,
+            and help build a healthier community.
+
+        </p>
+
+    </div>
+
+    <!-- FEATURES -->
+
+    <div class="cards">
+
+        <!-- PROFILE -->
+
+        <div class="card"
+             onclick="openProfile()">
+
+            <div class="icon">👤</div>
+
+            <h3>My Profile</h3>
+
+            <p>
+
+                View and manage your specialist
+                information and qualifications.
+
+            </p>
+
+        </div>
+
+        <!-- APPOINTMENTS -->
+
+        <div class="card"
+             onclick="openAppointments()">
+
+            <div class="icon">📅</div>
+
+            <h3>Appointments</h3>
+
+            <p>
+
+                Manage user appointments and
+                upcoming wellness sessions.
+
+            </p>
+
+        </div>
+
+        <!-- USER SUPPORT -->
+
+        <div class="card"
+             onclick="openUsers()">
+
+            <div class="icon">🤝</div>
+
+            <h3>User Support</h3>
+
+            <p>
+
+                Connect with users and provide
+                guidance and emotional support.
+
+            </p>
+
+        </div>
+
+        <!-- ANALYTICS -->
+
+        <div class="card"
+             onclick="openAnalytics()">
+
+            <div class="icon">📊</div>
+
+            <h3>Analytics</h3>
+
+            <p>
+
+                Track your sessions, support impact,
+                and user engagement statistics.
+
+            </p>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        // =========================
+        // GET SPECIALIST EMAIL
+        // =========================
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        const specialistEmail =
+            params.get("specialistEmail");
+
+        // =========================
+        // SECURITY CHECK
+        // =========================
+
+        if(!specialistEmail){
+
+            window.location.href =
+                "specialist-login.html";
+
+        }
+
+        // =========================
+        // SHOW SPECIALIST EMAIL
+        // =========================
+
+        document.getElementById(
+            "welcomeText"
+        ).innerText =
+
+            "Welcome " + specialistEmail;
+
+        // =========================
+        // LOGOUT
+        // =========================
+
+        function logoutSpecialist(){
+
+            window.location.href =
+                "specialist-login.html";
+
+        }
+
+        // =========================
+        // PROFILE
+        // =========================
+
+        function openProfile(){
+
+            window.location.href =
+
+                `myprofile.html?
+                specialistEmail=${specialistEmail}`;
+
+        }
+
+        // =========================
+        // APPOINTMENTS
+        // =========================
+
+        function openAppointments(){
+
+            window.location.href =
+
+                `appointments.html?specialistEmail=${specialistEmail}`;
+
+        }
+
+        // =========================
+        // USER SUPPORT
+        // =========================
+
+        function openUsers(){
+
+            window.location.href =`user-support.html?specialistEmail=${specialistEmail}`;
+
+        }
+
+        // =========================
+        // ANALYTICS
+        // =========================
+
+        function openAnalytics(){
+
+           window.location.href =`analytics.html?specialistEmail=${specialistEmail}`;
+
+        }
+
+    </script>
+
+</body>
+
+</html>

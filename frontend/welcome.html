@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindMitra Welcome</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body{
+
+            height:100vh;
+
+            display:flex;
+            justify-content:center;
+            align-items:center;
+
+            background:
+            linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)),
+            url('images/welcome.png');
+
+            background-size:cover;
+            background-position:center;
+            background-repeat:no-repeat;
+        }
+
+        .container{
+
+            width:900px;
+
+            padding:50px;
+
+            border-radius:25px;
+
+            background: rgba(255,255,255,0.08);
+
+            backdrop-filter: blur(10px);
+
+            -webkit-backdrop-filter: blur(10px);
+
+            border:1px solid rgba(255,255,255,0.2);
+
+            text-align:center;
+
+            color:white;
+
+            box-shadow:0 8px 32px rgba(0,0,0,0.35);
+        }
+
+        h1{
+
+            font-size:70px;
+
+            margin-bottom:20px;
+
+            color:white;
+        }
+
+        .tagline{
+
+            font-size:22px;
+
+            margin-bottom:15px;
+
+            font-weight:bold;
+        }
+
+        .description{
+
+            font-size:18px;
+
+            line-height:1.7;
+
+            margin-bottom:45px;
+
+            color:#f1f1f1;
+        }
+
+        .button-container{
+
+            display:flex;
+
+            justify-content:center;
+
+            gap:25px;
+
+            flex-wrap:wrap;
+        }
+
+        .card{
+
+            width:220px;
+
+            padding:25px;
+
+            border-radius:18px;
+
+            color:white;
+
+            cursor:pointer;
+
+            transition:0.3s;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.25);
+        }
+
+        .card:hover{
+
+            transform:translateY(-8px) scale(1.03);
+        }
+
+        .login{
+
+            background:linear-gradient(to right,#5582e5,#5288de);
+        }
+
+        .register{
+
+            background:linear-gradient(to right,#4fc47a,#51cf7f);
+        }
+
+        .explore{
+
+            background:linear-gradient(to right,#9333ea,#c084fc);
+        }
+
+        .icon{
+
+            font-size:45px;
+
+            margin-bottom:15px;
+        }
+
+        .title{
+
+            font-size:28px;
+
+            font-weight:bold;
+
+            margin-bottom:10px;
+        }
+
+        .subtitle{
+
+            font-size:16px;
+
+            opacity:0.9;
+        }
+
+        @media(max-width:900px){
+
+            .container{
+                width:95%;
+            }
+
+            h1{
+                font-size:50px;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>MindMitra</h1>
+
+        <div class="tagline">
+            You are not alone. We are here 💙
+        </div>
+
+        <div class="description">
+            MindMitra helps individuals overcome stress,
+            anxiety, loneliness, and emotional struggles through
+            community support, wellness activities, NGO guidance,
+            journaling, games, and mental health care.
+        </div>
+
+        <div class="button-container">
+
+            <div class="card login" onclick="goLogin()">
+
+                <div class="icon">🔐</div>
+
+                <div class="title">Login</div>
+
+                <div class="subtitle">
+                    Welcome back!
+                </div>
+
+            </div>
+
+            <div class="card register" onclick="goRegister()">
+
+                <div class="icon">📝</div>
+
+                <div class="title">Register</div>
+
+                <div class="subtitle">
+                    Create your account
+                </div>
+
+            </div>
+
+            <div class="card explore" onclick="goExplore()">
+
+                <div class="icon">🌍</div>
+
+                <div class="title">Explore</div>
+
+                <div class="subtitle">
+                    Discover MindMitra
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <script>
+        function goLogin(){
+            window.location.href="index.html";
+        }
+
+        function goRegister(){
+            window.location.href="index.html";
+        }
+
+        function goExplore(){
+            window.location.href="features.html";
+        }
+
+    </script>
+
+</body>
+</html>

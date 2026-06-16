@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Community Groups</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+
+            background:#fff7ed;
+
+            padding:30px;
+        }
+
+        h1{
+
+            text-align:center;
+
+            color:#d97706;
+
+            font-size:55px;
+
+            margin-bottom:10px;
+        }
+
+        .subtitle{
+
+            text-align:center;
+
+            color:#555;
+
+            margin-bottom:40px;
+
+            font-size:22px;
+        }
+
+        .group-container{
+
+            display:grid;
+
+            grid-template-columns:
+                repeat(auto-fit,minmax(340px,1fr));
+
+            gap:30px;
+        }
+
+        .card{
+
+            background:white;
+
+            padding:25px;
+
+            border-radius:25px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .icon{
+
+            font-size:70px;
+
+            margin-bottom:20px;
+        }
+
+        .card h2{
+
+            color:#d97706;
+
+            margin-bottom:15px;
+        }
+
+        .card p{
+
+            margin-bottom:15px;
+
+            color:#444;
+
+            line-height:1.6;
+        }
+
+        .privacy{
+
+            display:inline-block;
+
+            padding:8px 16px;
+
+            border-radius:20px;
+
+            color:white;
+
+            margin-bottom:20px;
+
+            font-weight:bold;
+        }
+
+        .public{
+
+            background:#16a34a;
+        }
+
+        .private{
+
+            background:#dc2626;
+        }
+
+        .button-group{
+
+            display:grid;
+
+            grid-template-columns:1fr 1fr;
+
+            gap:15px;
+
+            margin-top:20px;
+        }
+
+        button{
+
+            padding:14px;
+
+            border:none;
+
+            border-radius:12px;
+
+            color:white;
+
+            font-size:16px;
+
+            cursor:pointer;
+        }
+
+        .join-btn{
+
+            background:#2563eb;
+        }
+
+        .joined-btn{
+
+            background:#16a34a;
+        }
+
+        .pending-btn{
+
+            background:#f59e0b;
+        }
+
+        .details-btn{
+
+            background:#9333ea;
+        }
+
+        .leave-btn{
+
+            background:#dc2626;
+        }
+
+        button:disabled{
+
+            background:#9ca3af;
+
+            cursor:not-allowed;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <h1>🌍 Community Groups</h1>
+
+    <p class="subtitle">
+
+        Join NGO communities,
+        participate in activities,
+        polls and events
+
+    </p>
+
+    <div class="group-container"
+         id="groupContainer">
+
+    </div>
+
+    <script>
+
+        const API_URL =
+            "http://localhost:8081/ngo-group";
+
+        // =========================
+        // URL PARAMS
+        // =========================
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        const ngoEmail =
+            params.get("ngoEmail");
+
+        const userEmail =
+            params.get("userEmail");
+
+        const userName =
+            params.get("userName");
+
+        const displayUserName =
+            userName &&
+            userName !== "null"
+                ? userName
+                : userEmail;
+
+        // =========================
+        // LOAD GROUPS
+        // =========================
+
+        async function loadGroups(){
+
+            if(!ngoEmail || !userEmail){
+
+                document.getElementById(
+                    "groupContainer"
+                ).innerHTML = `
+
+                    <h2 style="
+                        color:#dc2626;
+                        text-align:center;
+                        width:100%;
+                    ">
+                        Missing NGO or user details.
+                        Please open groups from the NGO page.
+                    </h2>
+
+                `;
+
+                return;
+
+            }
+
+            // GET NGO GROUPS
+
+            const response =
+                await fetch(
+
+                    `${API_URL}/ngo/${encodeURIComponent(ngoEmail)}`
+
+                );
+
+            const groups =
+                await response.json();
+
+            // GET USER GROUPS
+
+            const joinedResponse =
+                await fetch(
+
+                    `${API_URL}/user/${encodeURIComponent(userEmail)}`
+
+                );
+
+            const joinedGroups =
+                await joinedResponse.json();
+
+            const joinedMap = {};
+
+            joinedGroups.forEach(g => {
+
+                joinedMap[g.groupId] =
+                    g.status;
+
+            });
+
+            displayGroups(
+                groups,
+                joinedMap
+            );
+
+        }
+
+        // =========================
+        // DISPLAY GROUPS
+        // =========================
+
+        function displayGroups(
+                groups,
+                joinedMap){
+
+            const container =
+                document.getElementById(
+                    "groupContainer"
+                );
+
+            container.innerHTML = "";
+
+            groups.forEach(g => {
+
+                const status =
+                    joinedMap[g.id];
+
+                let buttonHtml = "";
+
+                let openButtonHtml = "";
+
+                // APPROVED
+
+                if(status === "APPROVED"){
+
+                    buttonHtml =
+
+                    `
+                    <button class="joined-btn">
+
+                        Joined
+
+                    </button>
+
+                    <button class="leave-btn"
+
+                        onclick="
+                        leaveGroup(
+                            ${g.id}
+                        )">
+
+                        Leave
+
+                    </button>
+                    `;
+
+                    openButtonHtml =
+
+                    `
+                    <button class="details-btn"
+
+                        onclick="
+                        openGroup(
+                            ${g.id}
+                        )">
+
+                        Open
+
+                    </button>
+                    `;
+
+                }
+
+                // PENDING
+
+                else if(status === "PENDING"){
+
+                    buttonHtml =
+
+                    `
+                    <button class="pending-btn">
+
+                        Request Sent
+
+                    </button>
+
+                    <button disabled>
+
+                        Open After Approval
+
+                    </button>
+                    `;
+
+                }
+
+                // REJECTED
+
+                else if(status === "REJECTED"){
+
+                    buttonHtml =
+
+                    `
+                    <button class="pending-btn" disabled>
+
+                        Request Rejected
+
+                    </button>
+
+                    <button class="leave-btn"
+
+                        onclick="
+                        leaveGroup(
+                            ${g.id}
+                        )">
+
+                        Clear Request
+
+                    </button>
+                    `;
+
+                }
+
+                // NOT JOINED
+
+                else{
+
+                    buttonHtml =
+
+                    `
+                    <button class="join-btn"
+
+                        onclick="
+                        joinGroup(
+                            ${g.id},
+                            '${g.groupName}',
+                            '${g.ngoEmail}'
+                        )">
+
+                        ${g.privacy === 'PRIVATE'
+
+                            ?
+
+                            'Request Join'
+
+                            :
+
+                            'Join Group'
+
+                        }
+
+                    </button>
+
+                    <button disabled>
+
+                        Join To Open
+
+                    </button>
+                    `;
+
+                }
+
+                container.innerHTML += `
+
+                    <div class="card">
+
+                        <div class="icon">
+                            👥
+                        </div>
+
+                        <h2>
+                            ${g.groupName}
+                        </h2>
+
+                        <span class="privacy
+
+                            ${g.privacy === 'PUBLIC'
+
+                                ?
+
+                                'public'
+
+                                :
+
+                                'private'
+
+                            }">
+
+                            ${g.privacy}
+
+                        </span>
+
+                        <p>
+
+                            <b>NGO:</b><br>
+
+                            ${g.ngoName}
+
+                        </p>
+
+                        <p>
+
+                            <b>Description:</b><br>
+
+                            ${g.description}
+
+                        </p>
+
+                        <p>
+
+                            <b>Activities:</b><br>
+
+                            ${g.activityDetails || "N/A"}
+
+                        </p>
+
+                        <div class="button-group">
+
+                            ${buttonHtml}
+
+                            ${openButtonHtml}
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            });
+
+        }
+
+        // =========================
+        // JOIN GROUP
+        // =========================
+
+        async function joinGroup(
+                groupId,
+                groupName,
+                ngoEmail){
+
+            const response =
+                await fetch(
+
+                    `${API_URL}/join`,
+
+                    {
+
+                        method:"POST",
+
+                        headers:{
+                            "Content-Type":
+                            "application/json"
+                        },
+
+                        body:JSON.stringify({
+
+                            groupId,
+                            groupName,
+                            ngoEmail,
+                            userEmail,
+                            userName:
+                                displayUserName
+
+                        })
+
+                    }
+
+                );
+
+            const result =
+                await response.text();
+
+            alert(result);
+
+            loadGroups();
+
+        }
+
+        // =========================
+        // LEAVE GROUP
+        // =========================
+
+        async function leaveGroup(groupId){
+
+             const confirmLeave =
+        confirm(
+            "Leave this group?"
+        );
+
+    if(!confirmLeave){
+
+        return;
+
+    }
+
+    try{
+
+        const response =
+            await fetch(
+
+                `${API_URL}/leave?groupId=${groupId}&userEmail=${encodeURIComponent(userEmail)}`,
+
+                {
+                    method:"DELETE"
+                }
+
+            );
+
+        const result =
+            await response.text();
+
+        alert(result);
+
+        // REFRESH GROUPS
+
+        loadGroups();
+
+    }
+
+    catch(error){
+
+        alert(
+            "Error leaving group"
+        );
+
+    }
+
+        }
+
+        // =========================
+        // OPEN GROUP
+        // =========================
+
+        function openGroup(groupId){
+
+            window.location.href =
+
+                `group-details.html?groupId=${groupId}&userEmail=${encodeURIComponent(userEmail)}&userName=${encodeURIComponent(displayUserName || "")}`;
+
+        }
+
+        // =========================
+        // INITIAL LOAD
+        // =========================
+
+        loadGroups();
+
+    </script>
+
+</body>
+</html>

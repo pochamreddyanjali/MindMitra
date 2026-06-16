@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindMitra Breathing Relaxation</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+
+            height:100vh;
+
+            display:flex;
+
+            justify-content:center;
+
+            align-items:center;
+
+            flex-direction:column;
+
+            background:linear-gradient(to bottom,#dbeafe,#eff6ff);
+
+            overflow:hidden;
+        }
+
+        h1{
+
+            color:#2563eb;
+
+            font-size:45px;
+
+            margin-bottom:10px;
+        }
+
+        .subtitle{
+
+            color:#555;
+
+            font-size:20px;
+
+            margin-bottom:40px;
+        }
+
+        .top-bar{
+
+            position:absolute;
+
+            top:20px;
+
+            width:100%;
+
+            display:flex;
+
+            justify-content:space-between;
+
+            padding:0 30px;
+        }
+
+        .box{
+
+            background:white;
+
+            padding:15px 25px;
+
+            border-radius:15px;
+
+            box-shadow:0 4px 10px rgba(0,0,0,0.15);
+
+            font-size:20px;
+
+            font-weight:bold;
+
+            color:#2563eb;
+        }
+
+        .best{
+
+            color:#16a34a;
+        }
+
+        .breathing-container{
+
+            display:flex;
+
+            justify-content:center;
+
+            align-items:center;
+
+            flex-direction:column;
+        }
+
+        .circle{
+
+            width:180px;
+
+            height:180px;
+
+            border-radius:50%;
+
+            background:#60a5fa;
+
+            display:flex;
+
+            justify-content:center;
+
+            align-items:center;
+
+            color:white;
+
+            font-size:28px;
+
+            font-weight:bold;
+
+            animation:breathe 8s infinite;
+
+            box-shadow:0 0 40px rgba(96,165,250,0.6);
+        }
+
+        @keyframes breathe{
+
+            0%{
+                transform:scale(1);
+            }
+
+            50%{
+                transform:scale(1.5);
+            }
+
+            100%{
+                transform:scale(1);
+            }
+        }
+
+        .instructions{
+
+            margin-top:40px;
+
+            font-size:28px;
+
+            color:#2563eb;
+
+            font-weight:bold;
+        }
+
+        .session{
+
+            margin-top:20px;
+
+            font-size:22px;
+
+            color:#555;
+        }
+
+        .game-over{
+
+            margin-top:40px;
+
+            background:white;
+
+            padding:30px;
+
+            border-radius:20px;
+
+            text-align:center;
+
+            display:none;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .game-over h2{
+
+            color:#2563eb;
+
+            margin-bottom:20px;
+        }
+
+        button{
+
+            padding:15px 30px;
+
+            border:none;
+
+            border-radius:10px;
+
+            background:#2563eb;
+
+            color:white;
+
+            font-size:18px;
+
+            cursor:pointer;
+
+            margin-top:20px;
+        }
+
+        .history{
+
+            margin-top:20px;
+
+            text-align:left;
+        }
+
+        .history-item{
+
+            background:#dbeafe;
+
+            padding:10px;
+
+            border-radius:10px;
+
+            margin-top:10px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="top-bar">
+
+        <div class="box" id="score">
+            Calm Score: 0
+        </div>
+
+        <div class="box best" id="bestScore">
+            Best: 0
+        </div>
+
+    </div>
+
+    <h1>🌬️ Breathing Relaxation</h1>
+
+    <div class="subtitle">
+        Relax your mind through guided breathing 🌿
+    </div>
+
+    <div class="breathing-container">
+
+        <div class="circle" id="circle">
+            Breathe
+        </div>
+
+        <div class="instructions" id="instruction">
+            Inhale...
+        </div>
+
+        <div class="session" id="session">
+            Session: 0 / 5
+        </div>
+
+    </div>
+
+    <!-- GAME OVER -->
+
+    <div class="game-over" id="gameOver">
+
+        <h2>✨ Relaxation Complete ✨</h2>
+
+        <p id="finalScore"></p>
+
+        <div class="history" id="history">
+
+        </div>
+
+        <button onclick="restartGame()">
+            Start Again
+        </button>
+
+    </div>
+
+    <script>
+
+        const API_URL = "http://localhost:8081/game";
+
+        const userId = localStorage.getItem("userId");
+
+        let score = 0;
+
+        let sessions = 0;
+
+        async function loadBestScore(){
+
+            const response =
+                await fetch(`${API_URL}/best/${userId}/Breathing Game`);
+
+            const best = await response.text();
+
+            document.getElementById("bestScore").innerText =
+                "Best: " + best;
+
+        }
+
+        async function loadHistory(){
+
+            const response =
+                await fetch(`${API_URL}/history/${userId}/Breathing Game`);
+
+            const scores = await response.json();
+
+            const history =
+                document.getElementById("history");
+
+            history.innerHTML =
+                "<h3>Previous Scores</h3>";
+
+            scores.reverse().forEach(item => {
+
+                history.innerHTML += `
+
+                    <div class="history-item">
+
+                        Score: ${item.score}
+
+                    </div>
+
+                `;
+
+            });
+
+        }
+
+        function breathingCycle(){
+
+            const instruction =
+                document.getElementById("instruction");
+
+            instruction.innerText = "Inhale...";
+
+            setTimeout(() => {
+
+                instruction.innerText = "Hold...";
+
+            },4000);
+
+            setTimeout(() => {
+
+                instruction.innerText = "Exhale...";
+
+            },6000);
+
+        }
+
+        function startSession(){
+
+            const interval = setInterval(async () => {
+
+                sessions++;
+
+                score += 20;
+
+                document.getElementById("score").innerText =
+                    "Calm Score: " + score;
+
+                document.getElementById("session").innerText =
+                    `Session: ${sessions} / 5`;
+
+                breathingCycle();
+
+                if(sessions >= 5){
+
+                    clearInterval(interval);
+
+                    endGame();
+
+                }
+
+            },8000);
+
+        }
+
+        async function endGame(){
+
+            document.getElementById("finalScore")
+                .innerText =
+                "Your Calm Score: " + score;
+
+            document.getElementById("gameOver")
+                .style.display = "block";
+
+            await fetch(`${API_URL}/save`,{
+
+                method:"POST",
+
+                headers:{
+                    "Content-Type":"application/json"
+                },
+
+                body:JSON.stringify({
+
+                    gameName:"Breathing Game",
+                    score,
+                    userId
+
+                })
+
+            });
+
+            loadBestScore();
+
+            loadHistory();
+
+        }
+
+        function restartGame(){
+
+            location.reload();
+
+        }
+
+        breathingCycle();
+
+        startSession();
+
+        loadBestScore();
+
+    </script>
+
+</body>
+</html>

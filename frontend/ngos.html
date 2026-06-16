@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>MindMitra NGOs</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+
+            background:#fffbeb;
+
+            min-height:100vh;
+
+            padding:30px;
+        }
+
+        h1{
+
+            text-align:center;
+
+            color:#d97706;
+
+            font-size:50px;
+
+            margin-bottom:10px;
+        }
+
+        .subtitle{
+
+            text-align:center;
+
+            color:#555;
+
+            margin-bottom:40px;
+
+            font-size:20px;
+        }
+
+        /* LOGIN REGISTER CARDS */
+
+        .auth-container{
+
+            display:flex;
+
+            justify-content:center;
+
+            gap:30px;
+
+            flex-wrap:wrap;
+
+            margin-bottom:50px;
+        }
+
+        .auth-card{
+
+            background:white;
+
+            width:280px;
+
+            padding:30px;
+
+            border-radius:20px;
+
+            text-align:center;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+
+            transition:0.3s;
+
+            cursor:pointer;
+        }
+
+        .auth-card:hover{
+
+            transform:translateY(-8px);
+        }
+
+        .auth-icon{
+
+            font-size:60px;
+
+            margin-bottom:20px;
+        }
+
+        .auth-card h2{
+
+            color:#d97706;
+
+            margin-bottom:15px;
+
+            font-size:30px;
+        }
+
+        .auth-card p{
+
+            color:#555;
+
+            line-height:1.6;
+        }
+
+        /* NGO CARDS */
+
+        .container{
+
+            display:grid;
+
+            grid-template-columns:
+                repeat(auto-fit,minmax(320px,1fr));
+
+            gap:25px;
+        }
+
+        .card{
+
+            background:white;
+
+            padding:25px;
+
+            border-radius:20px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+
+            transition:0.3s;
+        }
+
+        .card:hover{
+
+            transform:translateY(-8px);
+        }
+
+        .icon{
+
+            font-size:60px;
+
+            margin-bottom:20px;
+        }
+
+        .card h2{
+
+            color:#d97706;
+
+            margin-bottom:12px;
+        }
+
+        .card p{
+
+            margin-bottom:10px;
+
+            color:#555;
+
+            line-height:1.6;
+        }
+
+        .button-group{
+
+            display:flex;
+
+            gap:10px;
+
+            margin-top:15px;
+        }
+
+        .connect-btn{
+
+            flex:1;
+
+            padding:14px;
+
+            border:none;
+
+            border-radius:12px;
+
+            background:#d97706;
+
+            color:white;
+
+            font-size:16px;
+
+            cursor:pointer;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <!-- TITLE -->
+
+    <h1>🤝 NGO Connect</h1>
+
+    <p class="subtitle">
+        Connect with verified NGOs supporting mental wellness
+    </p>
+
+    <!-- LOGIN / REGISTER -->
+
+    <div class="auth-container">
+
+        <!-- LOGIN -->
+
+        <div class="auth-card"
+             onclick="openNgoLogin()">
+
+            <div class="auth-icon">🔐</div>
+
+            <h2>NGO Login</h2>
+
+            <p>
+
+                Existing NGOs can login
+                and manage support services.
+
+            </p>
+
+        </div>
+
+        <!-- REGISTER -->
+
+        <div class="auth-card"
+             onclick="openNgoRegister()">
+
+            <div class="auth-icon">📝</div>
+
+            <h2>NGO Register</h2>
+
+            <p>
+
+                New NGOs can register
+                and join MindMitra.
+
+            </p>
+
+        </div>
+
+    </div>
+
+    <!-- NGO LIST -->
+
+    <div class="container"
+         id="ngoContainer">
+
+    </div>
+
+    <script>
+
+        const API_URL =
+            "http://localhost:8081/ngo";
+
+        let ngos = [];
+
+        // =========================
+        // LOAD NGOS
+        // =========================
+
+        async function loadNgos(){
+
+            const response =
+                await fetch(
+                    `${API_URL}/all-approved`
+                );
+
+            ngos =
+                await response.json();
+
+            displayNgos(ngos);
+
+        }
+
+        // =========================
+        // DISPLAY NGOS
+        // =========================
+
+        function displayNgos(data){
+
+            const container =
+                document.getElementById(
+                    "ngoContainer"
+                );
+
+            container.innerHTML = "";
+
+            data.forEach(n => {
+
+                container.innerHTML += `
+
+                    <div class="card">
+
+                        <div class="icon">🤝</div>
+
+                        <h2>${n.name}</h2>
+
+                        <p>
+                            <b>Phone:</b>
+                            ${n.phone}
+                        </p>
+
+                        <p>
+                            <b>Address:</b>
+                            ${n.address}
+                        </p>
+
+                        <p>
+                            <b>Description:</b>
+                            ${n.description}
+                        </p>
+
+                        <div class="button-group">
+
+                            <button class="connect-btn"
+                                onclick="connectNgo('${n.email}')">
+
+                                Connect
+
+                            </button>
+
+                            <button class="connect-btn"
+                                onclick="openGroups()">
+
+                                Groups
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            });
+
+        }
+
+        // =========================
+        // CONNECT NGO
+        // =========================
+
+        function connectNgo(email){
+
+            window.location.href =
+                `mailto:${email}`;
+
+        }
+
+        // =========================
+        // NGO LOGIN
+        // =========================
+
+        function openNgoLogin(){
+
+            window.location.href =
+                "ngo-login.html";
+
+        }
+
+        // =========================
+        // NGO REGISTER
+        // =========================
+
+        function openNgoRegister(){
+
+            window.location.href =
+                "ngo-register.html";
+
+        }
+
+        // =========================
+        // OPEN GROUPS
+        // =========================
+
+        function openGroups(){
+
+            window.location.href =
+                "groups.html";
+
+        }
+
+        // =========================
+        // INITIAL LOAD
+        // =========================
+
+        loadNgos();
+
+    </script>
+
+</body>
+
+</html>

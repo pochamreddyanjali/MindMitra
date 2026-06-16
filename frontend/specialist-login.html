@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>MindMitra Specialist Login</title>
+
+    <style>
+
+        *{
+
+            margin:0;
+
+            padding:0;
+
+            box-sizing:border-box;
+
+            font-family:Arial, Helvetica, sans-serif;
+
+        }
+
+        body{
+
+            min-height:100vh;
+
+            display:flex;
+
+            justify-content:center;
+
+            align-items:center;
+
+            background:linear-gradient(
+                135deg,
+                #d1fae5,
+                #a7f3d0,
+                #6ee7b7
+            );
+
+            padding:20px;
+
+        }
+
+        .login-box{
+
+            width:100%;
+
+            max-width:450px;
+
+            background:white;
+
+            padding:40px;
+
+            border-radius:25px;
+
+            box-shadow:0 10px 25px rgba(0,0,0,0.2);
+
+            text-align:center;
+
+        }
+
+        .icon{
+
+            font-size:80px;
+
+            margin-bottom:20px;
+
+        }
+
+        h1{
+
+            color:#059669;
+
+            margin-bottom:10px;
+
+            font-size:40px;
+
+        }
+
+        .subtitle{
+
+            color:#666;
+
+            margin-bottom:35px;
+
+            font-size:18px;
+
+        }
+
+        .input-group{
+
+            margin-bottom:25px;
+
+            text-align:left;
+
+        }
+
+        .input-group label{
+
+            display:block;
+
+            margin-bottom:8px;
+
+            color:#444;
+
+            font-weight:bold;
+
+        }
+
+        .input-group input{
+
+            width:100%;
+
+            padding:15px;
+
+            border-radius:12px;
+
+            border:1px solid #ddd;
+
+            font-size:16px;
+
+            outline:none;
+
+        }
+
+        .input-group input:focus{
+
+            border:1px solid #059669;
+
+        }
+
+        .login-btn{
+
+            width:100%;
+
+            padding:15px;
+
+            border:none;
+
+            border-radius:12px;
+
+            background:#059669;
+
+            color:white;
+
+            font-size:18px;
+
+            cursor:pointer;
+
+            transition:0.3s;
+
+        }
+
+        .login-btn:hover{
+
+            background:#047857;
+
+        }
+
+        .message{
+
+            margin-top:20px;
+
+            font-size:16px;
+
+            font-weight:bold;
+
+            line-height:1.6;
+        }
+
+        .register-link{
+
+            margin-top:25px;
+
+            font-size:16px;
+        }
+
+        .register-link a{
+
+            text-decoration:none;
+
+            color:#059669;
+
+            font-weight:bold;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="login-box">
+
+        <div class="icon">🩺</div>
+
+        <h1>Specialist Login</h1>
+
+        <p class="subtitle">
+            Login to access your specialist dashboard
+        </p>
+
+        <!-- EMAIL -->
+
+        <div class="input-group">
+
+            <label>Email</label>
+
+            <input type="email"
+                   id="email"
+                   placeholder="Enter email">
+
+        </div>
+
+        <!-- PASSWORD -->
+
+        <div class="input-group">
+
+            <label>Password</label>
+
+            <input type="password"
+                   id="password"
+                   placeholder="Enter password">
+
+        </div>
+
+        <!-- BUTTON -->
+
+        <button class="login-btn"
+                onclick="loginSpecialist()">
+
+            Login
+
+        </button>
+
+        <div class="message"
+             id="message">
+
+        </div>
+
+        <div class="register-link">
+
+            New specialist?
+
+            <a href="specialist-register.html">
+                Register Here
+            </a>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        const API_URL =
+            "http://localhost:8081/specialist";
+
+        // =========================
+        // LOGIN SPECIALIST
+        // =========================
+
+        async function loginSpecialist(){
+
+            const email =
+                document.getElementById(
+                    "email"
+                ).value;
+
+            const password =
+                document.getElementById(
+                    "password"
+                ).value;
+
+            const message =
+                document.getElementById(
+                    "message"
+                );
+
+            // VALIDATION
+
+            if(
+                email === "" ||
+                password === ""
+            ){
+
+                message.style.color =
+                    "red";
+
+                message.innerText =
+                    "Please fill all fields";
+
+                return;
+
+            }
+
+            try{
+
+                const response =
+                    await fetch(
+
+                        `${API_URL}/login`,
+
+                        {
+
+                            method:"POST",
+
+                            headers:{
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:JSON.stringify({
+
+                                email,
+                                password
+
+                            })
+
+                        }
+
+                    );
+
+                const result =
+                    await response.text();
+
+                // =========================
+                // SUCCESS
+                // =========================
+
+                if(
+                    result.toUpperCase()
+                    .startsWith("SUCCESS")
+                ){
+
+                    message.style.color =
+                        "green";
+
+                    message.innerText =
+                        "Login Successful";
+
+                    setTimeout(() => {
+
+                        window.location.href =
+                        `specialist-dashboard.html?specialistEmail=${email}`;
+
+                    },1000);
+
+                }
+
+                // =========================
+                // PENDING
+                // =========================
+
+                else if(
+                    result.toUpperCase()
+                    === "PENDING"
+                ){
+
+                    message.style.color =
+                        "#d97706";
+
+                    message.innerText =
+                        "Your account is under admin review.";
+
+                }
+
+                // =========================
+                // REJECTED
+                // =========================
+
+                else if(
+                    result.toUpperCase()
+                    .startsWith("REJECTED")
+                ){
+
+                    message.style.color =
+                        "red";
+
+                    message.innerText =
+                        result;
+
+                }
+
+                // =========================
+                // INVALID LOGIN
+                // =========================
+
+                else{
+
+                    message.style.color =
+                        "red";
+
+                    message.innerText =
+                        result;
+
+                }
+
+            }
+
+            catch(error){
+
+                message.style.color =
+                    "red";
+
+                message.innerText =
+                    "Server Error";
+
+            }
+
+        }
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width,
+                   initial-scale=1.0">
+
+    <title>Group Chat</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+
+            background:#fffbeb;
+
+            height:100vh;
+
+            display:flex;
+
+            flex-direction:column;
+        }
+
+        .top-bar{
+
+            background:#d97706;
+
+            color:white;
+
+            padding:20px;
+
+            display:flex;
+
+            justify-content:space-between;
+
+            align-items:center;
+        }
+
+        .top-bar h1{
+
+            font-size:28px;
+        }
+
+        .back-btn{
+
+            padding:10px 18px;
+
+            border:none;
+
+            border-radius:10px;
+
+            background:white;
+
+            color:#d97706;
+
+            cursor:pointer;
+
+            font-weight:bold;
+        }
+
+        .chat-container{
+
+            flex:1;
+
+            padding:25px;
+
+            overflow-y:auto;
+
+            display:flex;
+
+            flex-direction:column;
+
+            gap:18px;
+        }
+
+        .message{
+
+            max-width:70%;
+
+            padding:15px;
+
+            border-radius:18px;
+
+            line-height:1.6;
+        }
+
+        .sent{
+
+            align-self:flex-end;
+
+            background:#2563eb;
+
+            color:white;
+        }
+
+        .received{
+
+            align-self:flex-start;
+
+            background:white;
+
+            color:#333;
+
+            box-shadow:0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .sender-name{
+
+            font-size:13px;
+
+            font-weight:bold;
+
+            margin-bottom:5px;
+        }
+
+        .bottom-bar{
+
+            display:flex;
+
+            padding:20px;
+
+            background:white;
+
+            gap:15px;
+
+            box-shadow:0 -2px 8px rgba(0,0,0,0.1);
+        }
+
+        .bottom-bar input{
+
+            flex:1;
+
+            padding:15px;
+
+            border-radius:12px;
+
+            border:1px solid #ccc;
+
+            font-size:16px;
+        }
+
+        .send-btn{
+
+            padding:15px 25px;
+
+            border:none;
+
+            border-radius:12px;
+
+            background:#d97706;
+
+            color:white;
+
+            cursor:pointer;
+
+            font-size:16px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="top-bar">
+
+        <button class="back-btn"
+                onclick="goBack()">
+
+            Back
+
+        </button>
+
+        <h1>
+            💬 Group Chat
+        </h1>
+
+        <div></div>
+
+    </div>
+
+    <div class="chat-container"
+         id="chatContainer">
+
+    </div>
+
+    <div class="bottom-bar">
+
+        <input type="text"
+               id="messageInput"
+               placeholder="Type message...">
+
+        <button class="send-btn"
+                onclick="sendMessage()">
+
+            Send
+
+        </button>
+
+    </div>
+
+<script>
+
+    const API_URL =
+        "http://localhost:8081/ngo-chat";
+
+    const GROUP_API =
+        "http://localhost:8081/ngo-group";
+
+    // =========================
+    // URL PARAMS
+    // =========================
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const groupId =
+        params.get("groupId");
+
+    const sender =
+        params.get("sender");
+
+    const receiver =
+        params.get("receiver");
+
+    const name =
+        params.get("name");
+
+    const senderName =
+        name &&
+        name !== "null"
+            ? name
+            : sender;
+
+    let chatAccess = false;
+
+    // =========================
+    // CHECK MEMBERSHIP
+    // =========================
+
+    async function hasGroupAccess(){
+
+        if(!sender){
+
+            return false;
+
+        }
+
+        const response =
+            await fetch(
+
+                `${GROUP_API}/user/${encodeURIComponent(sender)}`
+
+            );
+
+        const groups =
+            await response.json();
+
+        return groups.some(g =>
+
+            g.groupId == groupId
+
+            &&
+
+            g.status === "APPROVED"
+
+        );
+
+    }
+
+    function showAccessDenied(){
+
+        chatAccess = false;
+
+        document.getElementById(
+            "chatContainer"
+        ).innerHTML = `
+
+            <div class="message received">
+
+                Join this group first to use chat.
+
+            </div>
+
+        `;
+
+        document.getElementById(
+            "messageInput"
+        ).disabled = true;
+
+    }
+
+    // =========================
+    // LOAD GROUP CHAT
+    // =========================
+
+    async function loadMessages(){
+
+        chatAccess =
+            await hasGroupAccess();
+
+        if(!chatAccess){
+
+            showAccessDenied();
+
+            return;
+
+        }
+
+        const response =
+            await fetch(
+
+                `${API_URL}/group/${groupId}`
+
+            );
+
+        const messages =
+            await response.json();
+
+        displayMessages(messages);
+
+    }
+
+    // =========================
+    // DISPLAY MESSAGES
+    // =========================
+
+    function displayMessages(messages){
+
+        const container =
+            document.getElementById(
+                "chatContainer"
+            );
+
+        container.innerHTML = "";
+
+        messages.forEach(m => {
+
+            const type =
+
+                m.senderEmail === sender
+
+                ?
+
+                "sent"
+
+                :
+
+                "received";
+
+            container.innerHTML += `
+
+                <div class="message ${type}">
+
+                    <div class="sender-name">
+
+                        ${m.senderName || m.senderEmail}
+
+                    </div>
+
+                    <div>
+
+                        ${m.message}
+
+                    </div>
+
+                </div>
+
+            `;
+
+        });
+
+        container.scrollTop =
+            container.scrollHeight;
+
+    }
+
+    // =========================
+    // SEND MESSAGE
+    // =========================
+
+    async function sendMessage(){
+
+        chatAccess =
+            await hasGroupAccess();
+
+        if(!chatAccess){
+
+            showAccessDenied();
+
+            return;
+
+        }
+
+        const input =
+            document.getElementById(
+                "messageInput"
+            );
+
+        const message =
+            input.value.trim();
+
+        if(message === ""){
+
+            return;
+
+        }
+
+        const response =
+            await fetch(
+
+                `${API_URL}/send`,
+
+                {
+
+                    method:"POST",
+
+                    headers:{
+                        "Content-Type":
+                        "application/json"
+                    },
+
+                    body:JSON.stringify({
+
+                        groupId:groupId,
+
+                        senderEmail:sender,
+
+                        receiverEmail:receiver,
+
+                        senderName:senderName,
+
+                        message:message
+
+                    })
+
+                }
+
+            );
+
+        const result =
+            await response.text();
+
+        console.log(result);
+
+        input.value = "";
+
+        loadMessages();
+
+    }
+
+    // =========================
+    // GO BACK
+    // =========================
+
+    function goBack(){
+
+        window.history.back();
+
+    }
+
+    // =========================
+    // AUTO REFRESH
+    // =========================
+
+    setInterval(
+
+        loadMessages,
+
+        2000
+
+    );
+
+    // =========================
+    // INITIAL LOAD
+    // =========================
+
+    async function initialLoad(){
+
+        chatAccess =
+            await hasGroupAccess();
+
+        if(!chatAccess){
+
+            showAccessDenied();
+
+            return;
+
+        }
+
+        loadMessages();
+
+    }
+
+    initialLoad();
+
+</script>
+
+</body>
+</html>

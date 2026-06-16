@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>MindMitra Specialist Registration</title>
+
+    <style>
+
+        *{
+
+            margin:0;
+
+            padding:0;
+
+            box-sizing:border-box;
+
+            font-family:Arial, Helvetica, sans-serif;
+
+        }
+
+        body{
+
+            min-height:100vh;
+
+            display:flex;
+
+            justify-content:center;
+
+            align-items:center;
+
+            background:linear-gradient(
+                135deg,
+                #d1fae5,
+                #a7f3d0,
+                #6ee7b7
+            );
+
+            padding:30px;
+
+        }
+
+        .register-box{
+
+            width:100%;
+
+            max-width:650px;
+
+            background:white;
+
+            padding:40px;
+
+            border-radius:25px;
+
+            box-shadow:0 10px 25px rgba(0,0,0,0.2);
+
+        }
+
+        .icon{
+
+            text-align:center;
+
+            font-size:80px;
+
+            margin-bottom:20px;
+
+        }
+
+        h1{
+
+            text-align:center;
+
+            color:#059669;
+
+            margin-bottom:10px;
+
+            font-size:40px;
+
+        }
+
+        .subtitle{
+
+            text-align:center;
+
+            color:#666;
+
+            margin-bottom:35px;
+
+            font-size:18px;
+
+        }
+
+        .input-group{
+
+            margin-bottom:22px;
+
+        }
+
+        .input-group label{
+
+            display:block;
+
+            margin-bottom:8px;
+
+            font-weight:bold;
+
+            color:#444;
+
+        }
+
+        .input-group input,
+        .input-group textarea{
+
+            width:100%;
+
+            padding:15px;
+
+            border-radius:12px;
+
+            border:1px solid #ddd;
+
+            outline:none;
+
+            font-size:16px;
+
+        }
+
+        .input-group textarea{
+
+            resize:none;
+
+            height:100px;
+
+        }
+
+        .input-group input:focus,
+        .input-group textarea:focus{
+
+            border:1px solid #059669;
+
+        }
+
+        .register-btn{
+
+            width:100%;
+
+            padding:16px;
+
+            border:none;
+
+            border-radius:12px;
+
+            background:#059669;
+
+            color:white;
+
+            font-size:18px;
+
+            cursor:pointer;
+
+            transition:0.3s;
+
+        }
+
+        .register-btn:hover{
+
+            background:#047857;
+
+        }
+
+        .message{
+
+            margin-top:20px;
+
+            text-align:center;
+
+            font-size:17px;
+
+            font-weight:bold;
+
+        }
+
+        .login-link{
+
+            margin-top:25px;
+
+            text-align:center;
+
+        }
+
+        .login-link a{
+
+            text-decoration:none;
+
+            color:#059669;
+
+            font-weight:bold;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="register-box">
+
+        <div class="icon">🩺</div>
+
+        <h1>Specialist Registration</h1>
+
+        <p class="subtitle">
+            Join MindMitra as a verified wellness expert
+        </p>
+
+        <!-- NAME -->
+
+        <div class="input-group">
+
+            <label>Full Name</label>
+
+            <input type="text"
+                   id="name"
+                   placeholder="Enter full name">
+
+        </div>
+
+        <!-- EMAIL -->
+
+        <div class="input-group">
+
+            <label>Email</label>
+
+            <input type="email"
+                   id="email"
+                   placeholder="Enter email">
+
+        </div>
+
+        <!-- PASSWORD -->
+
+        <div class="input-group">
+
+            <label>Password</label>
+
+            <input type="password"
+                   id="password"
+                   placeholder="Create password">
+
+        </div>
+
+        <!-- PHONE -->
+
+        <div class="input-group">
+
+            <label>Phone Number</label>
+
+            <input type="text"
+                   id="phone"
+                   placeholder="Enter phone number">
+
+        </div>
+
+        <!-- SPECIALIZATION -->
+
+        <div class="input-group">
+
+            <label>Specialization</label>
+
+            <input type="text"
+                   id="specialization"
+                   placeholder="Psychologist / Therapist / Counselor">
+
+        </div>
+
+        <!-- QUALIFICATION -->
+
+        <div class="input-group">
+
+            <label>Qualification</label>
+
+            <input type="text"
+                   id="qualification"
+                   placeholder="Enter qualifications">
+
+        </div>
+
+        <!-- EXPERIENCE -->
+
+        <div class="input-group">
+
+            <label>Experience</label>
+
+            <input type="text"
+                   id="experience"
+                   placeholder="Years of experience">
+
+        </div>
+
+        <!-- BIO -->
+
+        <div class="input-group">
+
+            <label>Professional Bio</label>
+
+            <textarea id="bio"
+                      placeholder="Tell us about your experience and expertise"></textarea>
+
+        </div>
+
+        <!-- BUTTON -->
+
+        <button class="register-btn"
+                onclick="registerSpecialist()">
+
+            Register Specialist
+
+        </button>
+
+        <div class="message"
+             id="message">
+
+        </div>
+
+        <div class="login-link">
+
+            Already registered?
+
+            <a href="specialist-login.html">
+                Login Here
+            </a>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        const API_URL =
+            "http://localhost:8081/specialist";
+
+        async function registerSpecialist(){
+
+            const specialist = {
+
+                name:
+                    document.getElementById("name").value,
+
+                email:
+                    document.getElementById("email").value,
+
+                password:
+                    document.getElementById("password").value,
+
+                phone:
+                    document.getElementById("phone").value,
+
+                specialization:
+                    document.getElementById("specialization").value,
+
+                qualification:
+                    document.getElementById("qualification").value,
+
+                experience:
+                    document.getElementById("experience").value,
+
+                bio:
+                    document.getElementById("bio").value
+
+            };
+
+            const message =
+                document.getElementById("message");
+
+            // VALIDATION
+
+            if(
+
+                specialist.name === "" ||
+                specialist.email === "" ||
+                specialist.password === "" ||
+                specialist.phone === "" ||
+                specialist.specialization === "" ||
+                specialist.qualification === "" ||
+                specialist.experience === "" ||
+                specialist.bio === ""
+
+            ){
+
+                message.style.color = "red";
+
+                message.innerText =
+                    "Please fill all fields";
+
+                return;
+
+            }
+
+            try{
+
+                const response =
+                    await fetch(
+                        `${API_URL}/register`,
+                        {
+
+                            method:"POST",
+
+                            headers:{
+                                "Content-Type":"application/json"
+                            },
+
+                            body:JSON.stringify(specialist)
+
+                        }
+                    );
+
+                const result =
+                    await response.text();
+
+                message.style.color =
+                    "green";
+
+                message.innerText =
+                    result;
+
+                // CLEAR FORM
+
+                document.getElementById("name").value = "";
+                document.getElementById("email").value = "";
+                document.getElementById("password").value = "";
+                document.getElementById("phone").value = "";
+                document.getElementById("specialization").value = "";
+                document.getElementById("qualification").value = "";
+                document.getElementById("experience").value = "";
+                document.getElementById("bio").value = "";
+
+            }
+
+            catch(error){
+
+                message.style.color =
+                    "red";
+
+                message.innerText =
+                    "Server Error";
+
+            }
+
+        }
+
+    </script>
+
+</body>
+</html>

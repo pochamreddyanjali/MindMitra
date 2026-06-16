@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Meditation & Relaxation</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial,sans-serif;
+        }
+
+        body{
+
+            min-height:100vh;
+
+            background:
+            linear-gradient(
+                rgba(0,0,0,0.4),
+                rgba(0,0,0,0.4)
+            ),
+
+            url("https://images.unsplash.com/photo-1506744038136-46273834b3fb");
+
+            background-size:cover;
+            background-position:center;
+
+            padding:40px;
+
+            color:white;
+
+        }
+
+        h1{
+
+            text-align:center;
+            margin-bottom:30px;
+            font-size:45px;
+
+        }
+
+        .container{
+
+            max-width:1200px;
+            margin:auto;
+
+        }
+
+        .card{
+
+            background:rgba(255,255,255,0.15);
+
+            backdrop-filter:blur(10px);
+
+            border-radius:20px;
+
+            padding:30px;
+
+            margin-bottom:30px;
+
+            box-shadow:0 8px 32px rgba(0,0,0,0.3);
+
+        }
+
+        h2{
+
+            margin-bottom:20px;
+
+        }
+
+        /* BREATHING */
+
+        .breathing-container{
+
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            flex-direction:column;
+
+        }
+
+        .circle{
+
+            width:180px;
+            height:180px;
+
+            border-radius:50%;
+
+            background:#00cec9;
+
+            animation:breathe 8s infinite;
+
+            margin-bottom:20px;
+
+        }
+
+        @keyframes breathe{
+
+            0%{
+                transform:scale(1);
+            }
+
+            50%{
+                transform:scale(1.4);
+            }
+
+            100%{
+                transform:scale(1);
+            }
+
+        }
+
+        /* TIMER */
+
+        .timer{
+
+            text-align:center;
+
+        }
+
+        .timer-display{
+
+            font-size:60px;
+            margin:20px 0;
+
+        }
+
+        button{
+
+            padding:12px 20px;
+
+            border:none;
+
+            border-radius:10px;
+
+            background:#00b894;
+
+            color:white;
+
+            font-size:16px;
+
+            cursor:pointer;
+
+            margin:5px;
+
+        }
+
+        button:hover{
+
+            background:#019875;
+
+        }
+
+        /* MUSIC */
+
+        audio{
+
+            width:100%;
+
+        }
+
+        /* QUOTE */
+
+        .quote{
+
+            font-size:24px;
+            text-align:center;
+            line-height:1.6;
+
+        }
+
+        /* HEATMAP */
+
+        .heatmap{
+
+            display:grid;
+
+            grid-template-columns:
+            repeat(7,40px);
+
+            gap:10px;
+
+            justify-content:center;
+
+            margin-top:20px;
+
+        }
+
+        .day{
+
+            width:40px;
+            height:40px;
+
+            border-radius:8px;
+
+            background:#dfe6e9;
+
+        }
+
+        .completed{
+
+            background:#00b894;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>
+            Meditation & Relaxation 🧘
+        </h1>
+
+        <!-- BREATHING -->
+
+        <div class="card">
+
+            <h2>Breathing Exercise 🌬️</h2>
+
+            <div class="breathing-container">
+
+                <div class="circle"></div>
+
+                <p>
+                    Inhale • Hold • Exhale
+                </p>
+
+            </div>
+
+        </div>
+
+        <!-- TIMER -->
+
+        <div class="card">
+
+            <h2>Meditation Timer ⏳</h2>
+
+            <div class="timer">
+
+                <div class="timer-display"
+                     id="timer">
+
+                    05:00
+
+                </div>
+
+                <button onclick="startTimer(300)">
+                    5 Min
+                </button>
+
+                <button onclick="startTimer(600)">
+                    10 Min
+                </button>
+
+                <button onclick="startTimer(900)">
+                    15 Min
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- MUSIC -->
+
+        <div class="card">
+
+            <h2>Relaxing Music 🎵</h2>
+
+            <audio controls>
+
+                <source
+                src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+                type="audio/mp3">
+
+            </audio>
+
+        </div>
+
+        <!-- QUOTES -->
+
+        <div class="card">
+
+            <h2>Positive Quote 🌞</h2>
+
+            <div class="quote"
+                 id="quote">
+
+                “You are stronger than your anxiety.”
+
+            </div>
+
+        </div>
+
+        <!-- HEATMAP -->
+
+        <div class="card">
+
+            <h2>Meditation Progress 🟩</h2>
+
+            <div class="heatmap"
+                 id="heatmap">
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        // =========================
+        // TIMER
+        // =========================
+
+        let countdown;
+
+        function startTimer(seconds){
+
+            clearInterval(countdown);
+
+            let time = seconds;
+
+            countdown = setInterval(() => {
+
+                const minutes =
+                    Math.floor(time / 60);
+
+                const secs =
+                    time % 60;
+
+                document.getElementById("timer")
+                    .innerText =
+
+                    `${String(minutes).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+
+                time--;
+
+                if(time < 0){
+
+                    clearInterval(countdown);
+
+                    alert(
+                        "Meditation Completed 🧘"
+                    );
+
+                    saveMeditation();
+
+                }
+
+            },1000);
+
+        }
+
+        // =========================
+        // QUOTES
+        // =========================
+
+        const quotes = [
+
+            "You are stronger than your anxiety.",
+
+            "Peace begins with a deep breath.",
+
+            "Healing takes time and courage.",
+
+            "Your mental health matters.",
+
+            "Small progress is still progress."
+
+        ];
+
+        setInterval(() => {
+
+            const random =
+                Math.floor(
+                    Math.random() * quotes.length
+                );
+
+            document.getElementById("quote")
+                .innerText = quotes[random];
+
+        },5000);
+
+        // =========================
+        // HEATMAP
+        // =========================
+
+        const heatmap =
+            document.getElementById("heatmap");
+
+        for(let i=1;i<=35;i++){
+
+            const box =
+                document.createElement("div");
+
+            box.classList.add("day");
+
+            if(i % 3 === 0){
+
+                box.classList.add(
+                    "completed"
+                );
+
+            }
+
+            heatmap.appendChild(box);
+
+        }
+
+        // =========================
+        // SAVE MEDITATION
+        // =========================
+
+        async function saveMeditation(){
+
+            const params =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+            const userEmail =
+                params.get("userEmail");
+
+            await fetch(
+                "http://localhost:8081/meditation/save",
+
+                {
+
+                    method:"POST",
+
+                    headers:{
+                        "Content-Type":"application/json"
+                    },
+
+                    body:JSON.stringify({
+
+                        userEmail:userEmail,
+
+                        minutes:5
+
+                    })
+
+                }
+
+            );
+
+        }
+
+    </script>
+
+</body>
+
+</html>
+```

@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width,
+                   initial-scale=1.0">
+
+    <title>NGO Announcements</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+
+            background:#fffbeb;
+
+            min-height:100vh;
+
+            padding:30px;
+        }
+
+        h1{
+
+            text-align:center;
+
+            color:#d97706;
+
+            margin-bottom:35px;
+
+            font-size:42px;
+        }
+
+        .container{
+
+            max-width:900px;
+
+            margin:auto;
+        }
+
+        .form-box{
+
+            background:white;
+
+            padding:30px;
+
+            border-radius:20px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+
+            margin-bottom:35px;
+        }
+
+        .input-group{
+
+            margin-bottom:20px;
+        }
+
+        .input-group label{
+
+            display:block;
+
+            margin-bottom:10px;
+
+            font-weight:bold;
+        }
+
+        .input-group input,
+        .input-group textarea{
+
+            width:100%;
+
+            padding:14px;
+
+            border-radius:12px;
+
+            border:1px solid #ddd;
+
+            font-size:16px;
+        }
+
+        textarea{
+
+            resize:none;
+
+            height:140px;
+        }
+
+        .post-btn{
+
+            width:100%;
+
+            padding:15px;
+
+            border:none;
+
+            border-radius:12px;
+
+            background:#d97706;
+
+            color:white;
+
+            font-size:17px;
+
+            cursor:pointer;
+        }
+
+        .announcement{
+
+            background:white;
+
+            padding:25px;
+
+            border-radius:20px;
+
+            margin-bottom:25px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .announcement h2{
+
+            color:#d97706;
+
+            margin-bottom:15px;
+        }
+
+        .announcement p{
+
+            margin-bottom:12px;
+
+            line-height:1.7;
+
+            color:#444;
+        }
+
+        .delete-btn{
+
+            padding:12px 20px;
+
+            border:none;
+
+            border-radius:10px;
+
+            background:#dc2626;
+
+            color:white;
+
+            cursor:pointer;
+        }
+
+        .message{
+
+            margin-top:15px;
+
+            text-align:center;
+
+            color:green;
+
+            font-weight:bold;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>📢 NGO Announcements</h1>
+
+        <!-- FORM -->
+
+        <div class="form-box">
+
+            <!-- TITLE -->
+
+            <div class="input-group">
+
+                <label>
+                    Announcement Title
+                </label>
+
+                <input type="text"
+                       id="title"
+                       placeholder="Enter Title">
+
+            </div>
+
+            <!-- MESSAGE -->
+
+            <div class="input-group">
+
+                <label>
+                    Announcement Message
+                </label>
+
+                <textarea
+                        id="messageText"
+                        placeholder="Enter Announcement">
+                </textarea>
+
+            </div>
+
+            <!-- MEETING LINK -->
+
+            <div class="input-group">
+
+                <label>
+                    Meeting Link
+                </label>
+
+                <input type="text"
+                       id="meetingLink"
+                       placeholder="Enter Meeting Link">
+
+            </div>
+
+            <!-- EVENT DETAILS -->
+
+            <div class="input-group">
+
+                <label>
+                    Event Details
+                </label>
+
+                <textarea
+                        id="eventDetails"
+                        placeholder="Outdoor activities, campaigns etc">
+                </textarea>
+
+            </div>
+
+            <!-- BUTTON -->
+
+            <button class="post-btn"
+                    onclick="postAnnouncement()">
+
+                Post Announcement
+
+            </button>
+
+            <!-- MESSAGE -->
+
+            <div class="message"
+                 id="responseMessage">
+
+            </div>
+
+        </div>
+
+        <!-- ANNOUNCEMENTS LIST -->
+
+        <div id="announcementContainer">
+
+        </div>
+
+    </div>
+
+    <script>
+
+        const API_URL =
+            "http://localhost:8081/announcement";
+
+        // GROUP ID
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        const groupId =
+            params.get("groupId");
+
+        // NGO DETAILS
+
+        const ngoEmail =
+            params.get(
+                "ngoEmail"
+            ) ||
+            localStorage.getItem(
+                "ngoEmail"
+            ) ||
+            "";
+
+        const ngoName =
+            params.get(
+                "ngoName"
+            ) ||
+            localStorage.getItem(
+                "ngoName"
+            ) ||
+            "";
+
+        // =========================
+        // POST ANNOUNCEMENT
+        // =========================
+
+        async function postAnnouncement(){
+
+            const title =
+                document.getElementById(
+                    "title"
+                ).value;
+
+            const message =
+                document.getElementById(
+                    "messageText"
+                ).value;
+
+            const meetingLink =
+                document.getElementById(
+                    "meetingLink"
+                ).value;
+
+            const eventDetails =
+                document.getElementById(
+                    "eventDetails"
+                ).value;
+
+            const response =
+                await fetch(
+
+                    `${API_URL}/create`,
+
+                    {
+
+                        method:"POST",
+
+                        headers:{
+                            "Content-Type":
+                            "application/json"
+                        },
+
+                        body:JSON.stringify({
+
+                            groupId,
+
+                            title,
+
+                            message,
+
+                            meetingLink,
+
+                            eventDetails,
+
+                            ngoEmail,
+
+                            ngoName
+
+                        })
+
+                    }
+
+                );
+
+            const result =
+                await response.text();
+
+            document.getElementById(
+                "responseMessage"
+            ).innerText = result;
+
+            // CLEAR FIELDS
+
+            document.getElementById(
+                "title"
+            ).value = "";
+
+            document.getElementById(
+                "messageText"
+            ).value = "";
+
+            document.getElementById(
+                "meetingLink"
+            ).value = "";
+
+            document.getElementById(
+                "eventDetails"
+            ).value = "";
+
+            loadAnnouncements();
+
+        }
+
+        // =========================
+        // LOAD ANNOUNCEMENTS
+        // =========================
+
+        async function loadAnnouncements(){
+
+            const response =
+                await fetch(
+
+                    `${API_URL}/group/${groupId}`
+
+                );
+
+            const announcements =
+                await response.json();
+
+            displayAnnouncements(
+                announcements
+            );
+
+        }
+
+        // =========================
+        // DISPLAY ANNOUNCEMENTS
+        // =========================
+
+        function displayAnnouncements(
+            announcements){
+
+            const container =
+                document.getElementById(
+                    "announcementContainer"
+                );
+
+            container.innerHTML = "";
+
+            announcements.forEach(a => {
+
+                container.innerHTML += `
+
+                    <div class="announcement">
+
+                        <h2>
+                            ${a.title}
+                        </h2>
+
+                        <p>
+
+                            <b>Message:</b><br>
+
+                            ${a.message}
+
+                        </p>
+
+                        <p>
+
+                            <b>Meeting Link:</b><br>
+
+                            ${a.meetingLink || 'N/A'}
+
+                        </p>
+
+                        <p>
+
+                            <b>Event Details:</b><br>
+
+                            ${a.eventDetails || 'N/A'}
+
+                        </p>
+
+                        <p>
+
+                            <b>Posted By:</b>
+
+                            ${a.ngoName}
+
+                        </p>
+
+                        <button class="delete-btn"
+                                onclick="deleteAnnouncement(${a.id})">
+
+                            Delete
+
+                        </button>
+
+                    </div>
+
+                `;
+
+            });
+
+        }
+
+        // =========================
+        // DELETE ANNOUNCEMENT
+        // =========================
+
+        async function deleteAnnouncement(id){
+
+            await fetch(
+
+                `${API_URL}/delete/${id}`,
+
+                {
+                    method:"DELETE"
+                }
+
+            );
+
+            loadAnnouncements();
+
+        }
+
+        // =========================
+        // INITIAL LOAD
+        // =========================
+
+        loadAnnouncements();
+
+    </script>
+
+</body>
+
+</html>

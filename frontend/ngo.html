@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width,
+                   initial-scale=1.0">
+
+    <title>MindMitra NGOs</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+
+            background:#fffbeb;
+
+            padding:30px;
+        }
+
+        h1{
+
+            text-align:center;
+
+            color:#d97706;
+
+            font-size:60px;
+
+            margin-bottom:10px;
+        }
+
+        .subtitle{
+
+            text-align:center;
+
+            color:#555;
+
+            margin-bottom:40px;
+
+            font-size:22px;
+        }
+
+        .ngo-container{
+
+            display:grid;
+
+            grid-template-columns:
+                repeat(auto-fit,minmax(340px,1fr));
+
+            gap:30px;
+        }
+
+        .card{
+
+            background:white;
+
+            padding:28px;
+
+            border-radius:25px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .icon{
+
+            font-size:70px;
+
+            margin-bottom:20px;
+        }
+
+        .card h2{
+
+            color:#d97706;
+
+            margin-bottom:18px;
+        }
+
+        .card p{
+
+            color:#444;
+
+            margin-bottom:15px;
+
+            line-height:1.6;
+        }
+
+        .btn-group{
+
+            display:grid;
+
+            grid-template-columns:1fr 1fr;
+
+            gap:15px;
+
+            margin-top:20px;
+        }
+
+        button{
+
+            padding:14px;
+
+            border:none;
+
+            border-radius:12px;
+
+            color:white;
+
+            cursor:pointer;
+
+            font-size:16px;
+        }
+
+        .groups-btn{
+
+            background:#2563eb;
+        }
+
+        .updates-btn{
+
+            background:#9333ea;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <h1>🤝 NGOs</h1>
+
+    <p class="subtitle">
+
+        Explore NGOs,
+        join groups and stay connected
+
+    </p>
+
+    <div class="ngo-container"
+         id="ngoContainer">
+
+    </div>
+
+<script>
+
+    const API_URL =
+        "http://localhost:8081/ngo";
+
+    // =========================
+    // URL PARAMS
+    // =========================
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const userEmail =
+        params.get("userEmail");
+
+    const userName =
+        params.get("userName");
+
+    // =========================
+    // LOAD NGOs
+    // =========================
+
+    async function loadNgos(){
+
+        try{
+
+            const response =
+                await fetch(
+
+                    `${API_URL}/all-approved`
+
+                );
+
+            const ngos =
+                await response.json();
+
+            displayNgos(ngos);
+
+        }
+
+        catch(error){
+
+            console.log(error);
+
+            alert(
+                "Failed to load NGOs"
+            );
+
+        }
+
+    }
+
+    // =========================
+    // DISPLAY NGOs
+    // =========================
+
+    function displayNgos(ngos){
+
+        const container =
+            document.getElementById(
+                "ngoContainer"
+            );
+
+        container.innerHTML = "";
+
+        if(ngos.length === 0){
+
+            container.innerHTML = `
+
+                <h2 style="
+                    color:#444;
+                    text-align:center;
+                    width:100%;
+                ">
+
+                    No NGOs Available
+
+                </h2>
+
+            `;
+
+            return;
+
+        }
+
+        ngos.forEach(ngo => {
+
+            container.innerHTML += `
+
+                <div class="card">
+
+                    <div class="icon">
+                        🤝
+                    </div>
+
+                    <h2>
+                        ${ngo.name}
+                    </h2>
+
+                    <p>
+
+                        <b>Email:</b><br>
+
+                        ${ngo.email}
+
+                    </p>
+
+                    <p>
+
+                        <b>Description:</b><br>
+
+                        ${ngo.description}
+
+                    </p>
+
+                    <div class="btn-group">
+
+                        <button class="groups-btn"
+
+                            onclick="
+                            openGroups(
+                                '${ngo.email}'
+                            )">
+
+                            Groups
+
+                        </button>
+
+                        <button class="updates-btn"
+
+                            onclick="
+                            openUpdates(
+                                '${ngo.email}',
+                                '${ngo.name}'
+                            )">
+
+                            Updates
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            `;
+
+        });
+
+    }
+
+    // =========================
+    // OPEN GROUPS
+    // =========================
+
+    function openGroups(ngoEmail){
+
+        window.location.href =
+
+            `groups.html?ngoEmail=${encodeURIComponent(ngoEmail)}&userEmail=${encodeURIComponent(userEmail)}&userName=${encodeURIComponent(userName || "")}`;
+
+    }
+
+    // =========================
+    // OPEN UPDATES
+    // =========================
+
+    function openUpdates(ngoEmail,ngoName){
+
+        window.location.href =
+
+            `ngo-updates.html?userEmail=${encodeURIComponent(userEmail)}&ngoEmail=${encodeURIComponent(ngoEmail)}&ngoName=${encodeURIComponent(ngoName || "")}`;
+
+    }
+
+    // =========================
+    // INITIAL LOAD
+    // =========================
+
+    loadNgos();
+
+</script>
+
+</body>
+</html>

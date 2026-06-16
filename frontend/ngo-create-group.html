@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width,
+                   initial-scale=1.0">
+
+    <title>Create NGO Group</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+
+            background:#fffbeb;
+
+            min-height:100vh;
+
+            padding:30px;
+        }
+
+        .container{
+
+            max-width:700px;
+
+            margin:auto;
+
+            background:white;
+
+            padding:40px;
+
+            border-radius:25px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h1{
+
+            text-align:center;
+
+            color:#d97706;
+
+            margin-bottom:30px;
+
+            font-size:40px;
+        }
+
+        .input-group{
+
+            margin-bottom:25px;
+        }
+
+        .input-group label{
+
+            display:block;
+
+            margin-bottom:10px;
+
+            font-weight:bold;
+
+            color:#444;
+        }
+
+        .input-group input,
+        .input-group textarea,
+        .input-group select{
+
+            width:100%;
+
+            padding:15px;
+
+            border-radius:12px;
+
+            border:1px solid #ddd;
+
+            font-size:16px;
+        }
+
+        textarea{
+
+            resize:none;
+
+            height:140px;
+        }
+
+        .create-btn{
+
+            width:100%;
+
+            padding:16px;
+
+            border:none;
+
+            border-radius:14px;
+
+            background:#d97706;
+
+            color:white;
+
+            font-size:18px;
+
+            cursor:pointer;
+
+            margin-top:10px;
+        }
+
+        .message{
+
+            margin-top:20px;
+
+            text-align:center;
+
+            font-weight:bold;
+
+            color:green;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🤝 Create NGO Group</h1>
+
+        <!-- GROUP NAME -->
+
+        <div class="input-group">
+
+            <label>
+                Group Name
+            </label>
+
+            <input type="text"
+                   id="groupName"
+                   placeholder="Enter Group Name">
+
+        </div>
+
+        <!-- DESCRIPTION -->
+
+        <div class="input-group">
+
+            <label>
+                Description
+            </label>
+
+            <textarea
+                    id="description"
+                    placeholder="Enter Group Description">
+            </textarea>
+
+        </div>
+
+        <!-- PRIVACY -->
+
+        <div class="input-group">
+
+            <label>
+                Group Privacy
+            </label>
+
+            <select id="privacy">
+
+                <option value="PUBLIC">
+                    PUBLIC
+                </option>
+
+                <option value="PRIVATE">
+                    PRIVATE
+                </option>
+
+            </select>
+
+        </div>
+
+        <!-- MEETING LINK -->
+
+        <div class="input-group">
+
+            <label>
+                Meeting Link
+            </label>
+
+            <input type="text"
+                   id="meetingLink"
+                   placeholder="Enter Meeting Link">
+
+        </div>
+
+        <!-- ACTIVITY DETAILS -->
+
+        <div class="input-group">
+
+            <label>
+                Activity Details
+            </label>
+
+            <textarea
+                    id="activityDetails"
+                    placeholder="Outdoor activities, events, campaigns etc">
+            </textarea>
+
+        </div>
+
+        <!-- BUTTON -->
+
+        <button class="create-btn"
+                onclick="createGroup()">
+
+            Create Group
+
+        </button>
+
+        <!-- MESSAGE -->
+
+        <div class="message"
+             id="message">
+
+        </div>
+
+    </div>
+
+    <script>
+
+        const API_URL =
+            "http://localhost:8081/ngo-group";
+
+        // NGO DETAILS
+
+        const ngoEmail =
+            localStorage.getItem(
+                "ngoEmail"
+            );
+
+        const ngoName =
+            localStorage.getItem(
+                "ngoName"
+            );
+
+        // =========================
+        // CREATE GROUP
+        // =========================
+
+        async function createGroup(){
+
+            const groupName =
+                document.getElementById(
+                    "groupName"
+                ).value;
+
+            const description =
+                document.getElementById(
+                    "description"
+                ).value;
+
+            const privacy =
+                document.getElementById(
+                    "privacy"
+                ).value;
+
+            const meetingLink =
+                document.getElementById(
+                    "meetingLink"
+                ).value;
+
+            const activityDetails =
+                document.getElementById(
+                    "activityDetails"
+                ).value;
+
+            const response =
+                await fetch(
+
+                    `${API_URL}/create`,
+
+                    {
+
+                        method:"POST",
+
+                        headers:{
+                            "Content-Type":
+                            "application/json"
+                        },
+
+                        body:JSON.stringify({
+
+                            groupName,
+
+                            description,
+
+                            privacy,
+
+                            meetingLink,
+
+                            activityDetails,
+
+                            ngoEmail,
+
+                            ngoName
+
+                        })
+
+                    }
+
+                );
+
+            const result =
+                await response.text();
+
+            document.getElementById(
+                "message"
+            ).innerText = result;
+
+            // CLEAR FIELDS
+
+            document.getElementById(
+                "groupName"
+            ).value = "";
+
+            document.getElementById(
+                "description"
+            ).value = "";
+
+            document.getElementById(
+                "meetingLink"
+            ).value = "";
+
+            document.getElementById(
+                "activityDetails"
+            ).value = "";
+
+        }
+
+    </script>
+
+</body>
+
+</html>

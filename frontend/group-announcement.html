@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width,
+                   initial-scale=1.0">
+
+    <title>Group Announcements</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+
+            background:#fffbeb;
+
+            min-height:100vh;
+
+            padding:30px;
+        }
+
+        .top-bar{
+
+            display:flex;
+
+            justify-content:space-between;
+
+            align-items:center;
+
+            margin-bottom:40px;
+        }
+
+        h1{
+
+            color:#d97706;
+
+            font-size:55px;
+        }
+
+        .back-btn{
+
+            padding:14px 22px;
+
+            border:none;
+
+            border-radius:12px;
+
+            background:#d97706;
+
+            color:white;
+
+            cursor:pointer;
+
+            font-size:16px;
+        }
+
+        .announcement-container{
+
+            display:flex;
+
+            flex-direction:column;
+
+            gap:25px;
+
+            max-width:1100px;
+
+            margin:auto;
+        }
+
+        .card{
+
+            background:white;
+
+            padding:30px;
+
+            border-radius:25px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .card h2{
+
+            color:#d97706;
+
+            margin-bottom:18px;
+
+            font-size:38px;
+        }
+
+        .card p{
+
+            color:#444;
+
+            line-height:1.8;
+
+            margin-bottom:18px;
+
+            font-size:18px;
+        }
+
+        .date{
+
+            color:#888;
+
+            font-size:15px;
+        }
+
+        .chat-btn{
+
+            margin-top:10px;
+
+            padding:12px 22px;
+
+            border:none;
+
+            border-radius:10px;
+
+            background:#2563eb;
+
+            color:white;
+
+            cursor:pointer;
+
+            font-size:15px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="top-bar">
+
+        <button class="back-btn"
+                onclick="goBack()">
+
+            Back
+
+        </button>
+
+        <h1>📢 Group Announcements</h1>
+
+        <div></div>
+
+    </div>
+
+    <div class="announcement-container"
+         id="announcementContainer">
+
+    </div>
+
+<script>
+
+    const API_URL =
+        "http://localhost:8081/announcement";
+
+    const GROUP_API =
+        "http://localhost:8081/ngo-group";
+
+    // =========================
+    // URL PARAMS
+    // =========================
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const groupId =
+        params.get("groupId");
+
+    const userEmail =
+        params.get("userEmail");
+
+    const userName =
+        params.get("userName");
+
+    // =========================
+    // CHECK MEMBERSHIP
+    // =========================
+
+    async function hasGroupAccess(){
+
+        if(!userEmail){
+
+            return false;
+
+        }
+
+        const response =
+            await fetch(
+
+                `${GROUP_API}/user/${encodeURIComponent(userEmail)}`
+
+            );
+
+        const groups =
+            await response.json();
+
+        return groups.some(g =>
+
+            g.groupId == groupId
+
+            &&
+
+            g.status === "APPROVED"
+
+        );
+
+    }
+
+    function showAccessDenied(){
+
+        document.getElementById(
+            "announcementContainer"
+        ).innerHTML = `
+
+            <div class="announcement-card">
+
+                <h2>Access Denied</h2>
+
+                <p>
+                    Join this group first to view
+                    announcements.
+                </p>
+
+            </div>
+
+        `;
+
+    }
+
+    // =========================
+    // LOAD ANNOUNCEMENTS
+    // =========================
+
+    async function loadAnnouncements(){
+
+        const allowed =
+            await hasGroupAccess();
+
+        if(!allowed){
+
+            showAccessDenied();
+
+            return;
+
+        }
+
+        const response =
+            await fetch(
+
+                `${API_URL}/group/${groupId}`
+
+            );
+
+        const announcements =
+            await response.json();
+
+        displayAnnouncements(
+            announcements
+        );
+
+    }
+
+    // =========================
+    // DISPLAY ANNOUNCEMENTS
+    // =========================
+
+    function displayAnnouncements(
+            announcements){
+
+        const container =
+            document.getElementById(
+                "announcementContainer"
+            );
+
+        container.innerHTML = "";
+
+        if(announcements.length === 0){
+
+            container.innerHTML = `
+
+                <div class="card">
+
+                    <h2>
+                        No Announcements
+                    </h2>
+
+                    <p>
+
+                        No announcements
+                        available for this group.
+
+                    </p>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+        announcements.forEach(a => {
+
+            container.innerHTML += `
+
+                <div class="card">
+
+                    <h2>
+                        ${a.title}
+                    </h2>
+
+                    <p>
+                        ${a.message}
+                    </p>
+
+                    <p>
+
+                        <b>Posted By:</b>
+
+                        ${a.ngoName}
+
+                    </p>
+
+                    <p class="date">
+
+                        ${a.createdAt}
+
+                    </p>
+
+                    <button class="chat-btn"
+
+                        onclick="
+                        openChat(
+                            '${a.ngoEmail}'
+                        )
+                        ">
+
+                        Chat NGO
+
+                    </button>
+
+                </div>
+
+            `;
+
+        });
+
+    }
+
+    // =========================
+    // OPEN GROUP CHAT
+    // =========================
+
+    function openChat(ngoEmail){
+
+        window.location.href =
+
+            `group-chat.html?groupId=${groupId}&sender=${userEmail}&receiver=${ngoEmail}&name=${userName}`;
+
+    }
+
+    // =========================
+    // GO BACK
+    // =========================
+
+    function goBack(){
+
+        window.history.back();
+
+    }
+
+    // =========================
+    // INITIAL LOAD
+    // =========================
+
+    loadAnnouncements();
+
+</script>
+
+</body>
+</html>

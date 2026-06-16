@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>MindMitra Features</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body{
+            background:#dbeafe;
+            padding:40px;
+        }
+
+        .logout-btn{
+
+            position:absolute;
+
+            top:20px;
+
+            right:20px;
+
+            padding:12px 22px;
+
+            border:none;
+
+            border-radius:10px;
+
+            background:#ef4444;
+
+            color:white;
+
+            font-size:16px;
+
+            cursor:pointer;
+
+            font-weight:bold;
+
+            transition:0.3s;
+        }
+
+        .logout-btn:hover{
+
+            background:#dc2626;
+
+            transform:scale(1.05);
+        }
+
+        h1{
+            text-align:center;
+            color:#2563eb;
+            margin-bottom:15px;
+            font-size:50px;
+        }
+
+        .subtitle{
+            text-align:center;
+            color:#555;
+            margin-bottom:50px;
+            font-size:20px;
+        }
+
+        .progress-section{
+            background:white;
+            padding:30px;
+            border-radius:20px;
+            margin-bottom:40px;
+            box-shadow:0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .progress-title{
+            font-size:32px;
+            color:#2563eb;
+            margin-bottom:25px;
+            text-align:center;
+        }
+
+        .progress-box{
+            margin-bottom:25px;
+        }
+
+        .progress-label{
+            display:flex;
+            justify-content:space-between;
+            margin-bottom:10px;
+            font-size:18px;
+            color:#333;
+        }
+
+        .progress-bar{
+            width:100%;
+            height:20px;
+            background:#ddd;
+            border-radius:20px;
+            overflow:hidden;
+        }
+
+        .progress-fill{
+            height:100%;
+            border-radius:20px;
+        }
+
+        .journal{
+            width:85%;
+            background:#2563eb;
+        }
+
+        .games{
+            width:70%;
+            background:#16a34a;
+        }
+
+        .therapy{
+            width:90%;
+            background:#9333ea;
+        }
+
+        .community{
+            width:75%;
+            background:#f59e0b;
+        }
+
+        .container{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+            gap:30px;
+        }
+
+        .card{
+            background:white;
+            padding:30px;
+            border-radius:20px;
+            box-shadow:0 4px 15px rgba(0,0,0,0.15);
+            transition:0.3s;
+            cursor:pointer;
+        }
+
+        .card:hover{
+            transform:translateY(-10px);
+            box-shadow:0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .icon{
+            font-size:50px;
+            margin-bottom:20px;
+        }
+
+        .title{
+            font-size:28px;
+            color:#2563eb;
+            margin-bottom:15px;
+            font-weight:bold;
+        }
+
+        .description{
+            color:#555;
+            line-height:1.7;
+            font-size:16px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <!-- LOGOUT -->
+
+    <button class="logout-btn"
+            onclick="logout()">
+
+        Logout
+
+    </button>
+
+    <!-- TITLE -->
+
+    <h1>MindMitra Features</h1>
+
+    <div class="subtitle">
+
+        Supporting mental wellness through
+        connection, healing, and emotional care 🌿
+
+    </div>
+
+    <!-- PROGRESS -->
+
+
+    <!-- FEATURES -->
+
+    <div class="container">
+
+        <!-- JOURNAL -->
+
+        <div class="card"
+             onclick="openJournal()">
+
+            <div class="icon">📝</div>
+
+            <div class="title">
+                Journal Writing
+            </div>
+
+            <div class="description">
+
+                Express your emotions,
+                thoughts, and experiences
+                through personal digital journaling.
+
+            </div>
+
+        </div>
+
+        <!-- HABIT -->
+
+        <div class="card"
+             onclick="openHabit()">
+
+            <div class="icon">🎯</div>
+
+            <div class="title">
+                Habit Tracker
+            </div>
+
+            <div class="description">
+
+                Build healthy habits and
+                monitor your wellness
+                progress daily.
+
+            </div>
+
+        </div>
+
+        <!-- GAMES -->
+
+        <div class="card"
+             onclick="openGames()">
+
+            <div class="icon">🎮</div>
+
+            <div class="title">
+                Stress Relief Games
+            </div>
+
+            <div class="description">
+
+                Enjoy calming games and
+                wellness activities
+                designed to reduce anxiety and stress.
+
+            </div>
+
+        </div>
+
+        <!-- SPECIALISTS -->
+
+        <div class="card"
+             onclick="openSpecialists()">
+
+            <div class="icon">👨‍⚕️</div>
+
+            <div class="title">
+                Specialists Connect
+            </div>
+
+            <div class="description">
+
+                Connect with therapists,
+                psychologists, and
+                mental health specialists.
+
+            </div>
+
+        </div>
+
+        <!-- NGO -->
+
+        <div class="card"
+             onclick="openNGO()">
+
+            <div class="icon">🤝</div>
+
+            <div class="title">
+                NGO Connect
+            </div>
+
+            <div class="description">
+
+                Reach NGOs and organizations
+                supporting emotional and mental wellness.
+
+            </div>
+
+        </div>
+
+        <!-- COMMUNITY -->
+
+       
+
+        <!-- EMERGENCY -->
+
+    
+
+        <!-- MEDITATION -->
+
+        <div class="card"
+             onclick="openMeditation()">
+
+            <div class="icon">🧘</div>
+
+            <div class="title">
+                Meditation & Relaxation
+            </div>
+
+            <div class="description">
+
+                Practice mindfulness and
+                breathing exercises to achieve
+                emotional calmness.
+
+            </div>
+
+        </div>
+
+        <!-- MOOD -->
+
+       
+
+        <!-- CHAT -->
+
+        <div class="card"
+             onclick="openChat()">
+
+            <div class="icon">💬</div>
+
+            <div class="title">
+                Anonymous Chat Support
+            </div>
+
+            <div class="description">
+
+                Share feelings anonymously and receive
+                support without fear or judgment.
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        // =========================
+        // GET USER EMAIL
+        // =========================
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        const userEmail =
+            params.get("userEmail");
+
+        const userName =
+            params.get("userName");
+
+        // =========================
+        // JOURNAL
+        // =========================
+
+        function openJournal(){
+
+            window.location.href =
+                "journal.html";
+
+        }
+
+        // =========================
+        // HABIT TRACKER
+        // =========================
+
+        function openHabit(){
+
+            window.location.href =
+                "todo.html";
+
+        }
+
+        // =========================
+        // GAMES
+        // =========================
+
+        function openGames(){
+
+            window.location.href =
+                "games.html";
+
+        }
+
+        // =========================
+        // SPECIALISTS
+        // =========================
+
+        function openSpecialists(){
+
+            window.location.href =
+            `specialists.html?userEmail=${userEmail}`;
+
+        }
+
+        // =========================
+        // NGO
+        // =========================
+
+        function openNGO(){
+
+            window.location.href =
+                `ngo.html?userEmail=${encodeURIComponent(userEmail)}&userName=${encodeURIComponent(userName || "")}`;
+
+        }
+
+        // =========================
+        // COMMUNITY GROUPS
+        // =========================
+
+        function openCommunity(){
+
+            window.location.href =
+                `groups.html?userEmail=${encodeURIComponent(userEmail)}&userName=${encodeURIComponent(userName || "")}`;
+
+        }
+
+        // =========================
+        // EMERGENCY
+        // =========================
+
+        function openEmergency(){
+
+            window.location.href =
+                "emergency.html";
+
+        }
+
+        // =========================
+        // MEDITATION
+        // =========================
+
+        function openMeditation(){
+
+            window.location.href =
+                "meditation.html";
+
+        }
+
+        // =========================
+        // MOOD TRACKER
+        // =========================
+
+        function openMood(){
+
+            window.location.href =
+                "mood.html";
+
+        }
+
+        // =========================
+        // CHAT
+        // =========================
+
+        function openChat(){
+
+            window.location.href =
+                "ai.html";
+
+        }
+
+        // =========================
+        // LOGOUT
+        // =========================
+
+        function logout(){
+
+            window.location.href =
+                "index.html";
+
+        }
+
+    </script>
+
+</body>
+
+</html>

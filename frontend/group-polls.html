@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width,
+                   initial-scale=1.0">
+
+    <title>Group Polls</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+
+            background:#fffbeb;
+
+            min-height:100vh;
+
+            padding:30px;
+        }
+
+        h1{
+
+            text-align:center;
+
+            color:#7c3aed;
+
+            margin-bottom:35px;
+
+            font-size:42px;
+        }
+
+        .container{
+
+            max-width:950px;
+
+            margin:auto;
+        }
+
+        .poll-card{
+
+            background:white;
+
+            padding:30px;
+
+            border-radius:22px;
+
+            margin-bottom:30px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .poll-card h2{
+
+            color:#7c3aed;
+
+            margin-bottom:25px;
+
+            line-height:1.6;
+        }
+
+        .option{
+
+            padding:14px;
+
+            border-radius:12px;
+
+            border:none;
+
+            background:#f3f4f6;
+
+            margin-bottom:15px;
+
+            width:100%;
+
+            text-align:left;
+
+            cursor:pointer;
+
+            transition:0.3s;
+
+            font-size:16px;
+        }
+
+        .option:hover{
+
+            background:#ddd6fe;
+        }
+
+        .results{
+
+            margin-top:20px;
+
+            background:#faf5ff;
+
+            padding:20px;
+
+            border-radius:15px;
+        }
+
+        .results h3{
+
+            color:#7c3aed;
+
+            margin-bottom:15px;
+        }
+
+        .result-item{
+
+            margin-bottom:12px;
+
+            color:#444;
+
+            font-weight:bold;
+        }
+
+        .voted{
+
+            margin-top:18px;
+
+            color:green;
+
+            font-weight:bold;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>📊 Community Polls</h1>
+
+        <!-- POLLS -->
+
+        <div id="pollContainer">
+
+        </div>
+
+    </div>
+
+    <script>
+
+        const POLL_API =
+            "http://localhost:8081/poll";
+
+        const GROUP_API =
+            "http://localhost:8081/ngo-group";
+
+        // GROUP ID
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        const groupId =
+            params.get("groupId");
+
+        // USER DETAILS
+
+        const userEmail =
+            params.get(
+                "userEmail"
+            ) ||
+            localStorage.getItem(
+                "userEmail"
+            ) ||
+            "";
+
+        const userName =
+            params.get(
+                "userName"
+            ) ||
+            localStorage.getItem(
+                "userName"
+            ) ||
+            userEmail;
+
+        // =========================
+        // CHECK MEMBERSHIP
+        // =========================
+
+        async function hasGroupAccess(){
+
+            if(!userEmail){
+
+                return false;
+
+            }
+
+            const response =
+                await fetch(
+
+                    `${GROUP_API}/user/${encodeURIComponent(userEmail)}`
+
+                );
+
+            const groups =
+                await response.json();
+
+            return groups.some(g =>
+
+                g.groupId == groupId
+
+                &&
+
+                g.status === "APPROVED"
+
+            );
+
+        }
+
+        function showAccessDenied(){
+
+            document.getElementById(
+                "pollContainer"
+            ).innerHTML = `
+
+                <div class="poll-card">
+
+                    <h2>Access Denied</h2>
+
+                    <p>
+                        Join this group first to view
+                        and vote in polls.
+                    </p>
+
+                </div>
+
+            `;
+
+        }
+
+        // =========================
+        // LOAD POLLS
+        // =========================
+
+        async function loadPolls(){
+
+            const allowed =
+                await hasGroupAccess();
+
+            if(!allowed){
+
+                showAccessDenied();
+
+                return;
+
+            }
+
+            const response =
+                await fetch(
+
+                    `${POLL_API}/group/${groupId}`
+
+                );
+
+            const polls =
+                await response.json();
+
+            displayPolls(polls);
+
+        }
+
+        // =========================
+        // DISPLAY POLLS
+        // =========================
+
+        async function displayPolls(polls){
+
+            const container =
+                document.getElementById(
+                    "pollContainer"
+                );
+
+            container.innerHTML = "";
+
+            for(const poll of polls){
+
+                // RESULTS
+
+                const resultResponse =
+                    await fetch(
+
+                        `${POLL_API}/results/${poll.id}`
+
+                    );
+
+                const results =
+                    await resultResponse.json();
+
+                container.innerHTML += `
+
+                    <div class="poll-card">
+
+                        <h2>
+                            ${poll.question}
+                        </h2>
+
+                        ${poll.option1
+                            ?
+                            `
+                            <button
+                                class="option"
+
+                                onclick="
+                                votePoll(
+                                    ${poll.id},
+                                    '${poll.option1}'
+                                )">
+
+                                ${poll.option1}
+
+                            </button>
+                            `
+                            : ''
+                        }
+
+                        ${poll.option2
+                            ?
+                            `
+                            <button
+                                class="option"
+
+                                onclick="
+                                votePoll(
+                                    ${poll.id},
+                                    '${poll.option2}'
+                                )">
+
+                                ${poll.option2}
+
+                            </button>
+                            `
+                            : ''
+                        }
+
+                        ${poll.option3
+                            ?
+                            `
+                            <button
+                                class="option"
+
+                                onclick="
+                                votePoll(
+                                    ${poll.id},
+                                    '${poll.option3}'
+                                )">
+
+                                ${poll.option3}
+
+                            </button>
+                            `
+                            : ''
+                        }
+
+                        ${poll.option4
+                            ?
+                            `
+                            <button
+                                class="option"
+
+                                onclick="
+                                votePoll(
+                                    ${poll.id},
+                                    '${poll.option4}'
+                                )">
+
+                                ${poll.option4}
+
+                            </button>
+                            `
+                            : ''
+                        }
+
+                        <div class="results">
+
+                            <h3>
+                                Live Results
+                            </h3>
+
+                            ${Object.entries(results)
+                                .map(r =>
+
+                                    `
+
+                                    <div class="result-item">
+
+                                        ${r[0]} :
+                                        ${r[1]} votes
+
+                                    </div>
+
+                                    `
+
+                                ).join("")
+                            }
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+
+        }
+
+        // =========================
+        // VOTE POLL
+        // =========================
+
+        async function votePoll(
+
+            pollId,
+
+            selectedOption
+
+        ){
+
+            if(!userEmail){
+
+                alert(
+                    "User email missing. Please open polls from your group page."
+                );
+
+                return;
+
+            }
+
+            const allowed =
+                await hasGroupAccess();
+
+            if(!allowed){
+
+                alert(
+                    "You must be a joined group member to vote."
+                );
+
+                showAccessDenied();
+
+                return;
+
+            }
+
+            const response =
+                await fetch(
+
+                    `${POLL_API}/vote`,
+
+                    {
+
+                        method:"POST",
+
+                        headers:{
+                            "Content-Type":
+                            "application/json"
+                        },
+
+                        body:JSON.stringify({
+
+                            pollId,
+
+                            groupId,
+
+                            userEmail,
+
+                            userName,
+
+                            selectedOption
+
+                        })
+
+                    }
+
+                );
+
+            const result =
+                await response.text();
+
+            alert(result);
+
+            loadPolls();
+
+        }
+
+        // =========================
+        // INITIAL LOAD
+        // =========================
+
+        loadPolls();
+
+    </script>
+
+</body>
+
+</html>

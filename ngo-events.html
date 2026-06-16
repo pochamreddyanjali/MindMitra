@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width,
+                   initial-scale=1.0">
+
+    <title>NGO Events</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+
+            background:#fffbeb;
+
+            min-height:100vh;
+
+            padding:30px;
+        }
+
+        h1{
+
+            text-align:center;
+
+            color:#d97706;
+
+            margin-bottom:35px;
+
+            font-size:42px;
+        }
+
+        .container{
+
+            max-width:950px;
+
+            margin:auto;
+        }
+
+        .form-box{
+
+            background:white;
+
+            padding:30px;
+
+            border-radius:20px;
+
+            margin-bottom:35px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .input-group{
+
+            margin-bottom:20px;
+        }
+
+        .input-group label{
+
+            display:block;
+
+            margin-bottom:10px;
+
+            font-weight:bold;
+        }
+
+        .input-group input,
+        .input-group textarea,
+        .input-group select{
+
+            width:100%;
+
+            padding:14px;
+
+            border-radius:12px;
+
+            border:1px solid #ddd;
+
+            font-size:16px;
+        }
+
+        textarea{
+
+            resize:none;
+
+            height:120px;
+        }
+
+        .create-btn{
+
+            width:100%;
+
+            padding:15px;
+
+            border:none;
+
+            border-radius:12px;
+
+            background:#059669;
+
+            color:white;
+
+            font-size:17px;
+
+            cursor:pointer;
+        }
+
+        .event-card{
+
+            background:white;
+
+            padding:25px;
+
+            border-radius:20px;
+
+            margin-bottom:25px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .event-card h2{
+
+            color:#059669;
+
+            margin-bottom:15px;
+        }
+
+        .event-card p{
+
+            margin-bottom:12px;
+
+            color:#444;
+
+            line-height:1.7;
+        }
+
+        .type{
+
+            display:inline-block;
+
+            padding:8px 14px;
+
+            border-radius:20px;
+
+            color:white;
+
+            margin-bottom:15px;
+        }
+
+        .online{
+
+            background:#2563eb;
+        }
+
+        .offline{
+
+            background:#dc2626;
+        }
+
+        .delete-btn{
+
+            margin-top:15px;
+
+            padding:12px 20px;
+
+            border:none;
+
+            border-radius:10px;
+
+            background:#dc2626;
+
+            color:white;
+
+            cursor:pointer;
+        }
+
+        .message{
+
+            margin-top:15px;
+
+            text-align:center;
+
+            color:green;
+
+            font-weight:bold;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🎉 NGO Events</h1>
+
+        <!-- CREATE EVENT -->
+
+        <div class="form-box">
+
+            <!-- TITLE -->
+
+            <div class="input-group">
+
+                <label>
+                    Event Title
+                </label>
+
+                <input type="text"
+                       id="title"
+                       placeholder="Enter Event Title">
+
+            </div>
+
+            <!-- DESCRIPTION -->
+
+            <div class="input-group">
+
+                <label>
+                    Event Description
+                </label>
+
+                <textarea
+                        id="description"
+                        placeholder="Enter Event Description">
+                </textarea>
+
+            </div>
+
+            <!-- EVENT TYPE -->
+
+            <div class="input-group">
+
+                <label>
+                    Event Type
+                </label>
+
+                <select id="eventType">
+
+                    <option value="ONLINE">
+                        ONLINE
+                    </option>
+
+                    <option value="OFFLINE">
+                        OFFLINE
+                    </option>
+
+                </select>
+
+            </div>
+
+            <!-- LOCATION -->
+
+            <div class="input-group">
+
+                <label>
+                    Location
+                </label>
+
+                <input type="text"
+                       id="location"
+                       placeholder="Enter Event Location">
+
+            </div>
+
+            <!-- DATE -->
+
+            <div class="input-group">
+
+                <label>
+                    Event Date
+                </label>
+
+                <input type="date"
+                       id="eventDate">
+
+            </div>
+
+            <!-- TIME -->
+
+            <div class="input-group">
+
+                <label>
+                    Event Time
+                </label>
+
+                <input type="time"
+                       id="eventTime">
+
+            </div>
+
+            <!-- MEETING LINK -->
+
+            <div class="input-group">
+
+                <label>
+                    Meeting Link
+                </label>
+
+                <input type="text"
+                       id="meetingLink"
+                       placeholder="Enter Meeting Link">
+
+            </div>
+
+            <!-- BUTTON -->
+
+            <button class="create-btn"
+                    type="button"
+                    id="createEventButton">
+
+                Create Event
+
+            </button>
+
+            <!-- RESPONSE -->
+
+            <div class="message"
+                 id="responseMessage">
+
+            </div>
+
+        </div>
+
+        <!-- EVENTS -->
+
+        <div id="eventContainer">
+
+        </div>
+
+    </div>
+
+    <script>
+
+        const API_URL =
+            "http://localhost:8081/ngo-event";
+
+        // GROUP ID
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        const groupId =
+            params.get("groupId");
+
+        // NGO DETAILS
+
+        const ngoEmail =
+            params.get(
+                "ngoEmail"
+            ) ||
+            localStorage.getItem(
+                "ngoEmail"
+            ) ||
+            "";
+
+        const ngoName =
+            params.get(
+                "ngoName"
+            ) ||
+            localStorage.getItem(
+                "ngoName"
+            ) ||
+            "";
+
+        // =========================
+        // CREATE EVENT
+        // =========================
+
+        async function createEvent(){
+
+            const message =
+                document.getElementById(
+                    "responseMessage"
+                );
+
+            if(!groupId){
+
+                message.style.color =
+                    "red";
+
+                message.innerText =
+                    "Group ID missing";
+
+                return;
+
+            }
+
+            const title =
+                document.getElementById(
+                    "title"
+                ).value;
+
+            const description =
+                document.getElementById(
+                    "description"
+                ).value;
+
+            const eventType =
+                document.getElementById(
+                    "eventType"
+                ).value;
+
+            const location =
+                document.getElementById(
+                    "location"
+                ).value;
+
+            const eventDate =
+                document.getElementById(
+                    "eventDate"
+                ).value;
+
+            const eventTime =
+                document.getElementById(
+                    "eventTime"
+                ).value;
+
+            const meetingLink =
+                document.getElementById(
+                    "meetingLink"
+                ).value;
+
+            try{
+
+                const response =
+                    await fetch(
+
+                        `${API_URL}/create`,
+
+                        {
+
+                            method:"POST",
+
+                            headers:{
+                                "Content-Type":
+                                "application/json"
+                            },
+
+                            body:JSON.stringify({
+
+                                groupId,
+
+                                title,
+
+                                description,
+
+                                eventType,
+
+                                location,
+
+                                eventDate,
+
+                                eventTime,
+
+                                meetingLink,
+
+                                ngoEmail,
+
+                                ngoName
+
+                            })
+
+                        }
+
+                    );
+
+                const result =
+                    await response.text();
+
+                if(!response.ok){
+
+                    message.style.color =
+                        "red";
+
+                    message.innerText = result;
+
+                    return;
+
+                }
+
+                message.style.color =
+                    "green";
+
+                message.innerText = result;
+
+            }
+
+            catch(error){
+
+                message.style.color =
+                    "red";
+
+                message.innerText =
+                    "Failed to create event";
+
+                return;
+
+            }
+
+            // CLEAR FIELDS
+
+            document.getElementById(
+                "title"
+            ).value = "";
+
+            document.getElementById(
+                "description"
+            ).value = "";
+
+            document.getElementById(
+                "location"
+            ).value = "";
+
+            document.getElementById(
+                "eventDate"
+            ).value = "";
+
+            document.getElementById(
+                "eventTime"
+            ).value = "";
+
+            document.getElementById(
+                "meetingLink"
+            ).value = "";
+
+            loadEvents();
+
+        }
+
+        // =========================
+        // LOAD EVENTS
+        // =========================
+
+        async function loadEvents(){
+
+            if(!groupId){
+
+                return;
+
+            }
+
+            try{
+
+                const response =
+                    await fetch(
+
+                        `${API_URL}/group/${groupId}`
+
+                    );
+
+                const events =
+                    await response.json();
+
+                displayEvents(events);
+
+            }
+
+            catch(error){
+
+                console.log(error);
+
+            }
+
+        }
+
+        // =========================
+        // DISPLAY EVENTS
+        // =========================
+
+        function displayEvents(events){
+
+            const container =
+                document.getElementById(
+                    "eventContainer"
+                );
+
+            container.innerHTML = "";
+
+            events.forEach(event => {
+
+                container.innerHTML += `
+
+                    <div class="event-card">
+
+                        <div class="type
+                            ${event.eventType === 'ONLINE'
+                                ? 'online'
+                                : 'offline'}">
+
+                            ${event.eventType}
+
+                        </div>
+
+                        <h2>
+                            ${event.title}
+                        </h2>
+
+                        <p>
+
+                            <b>Description:</b><br>
+
+                            ${event.description}
+
+                        </p>
+
+                        <p>
+
+                            <b>Location:</b>
+
+                            ${event.location || 'N/A'}
+
+                        </p>
+
+                        <p>
+
+                            <b>Date:</b>
+
+                            ${event.eventDate}
+
+                        </p>
+
+                        <p>
+
+                            <b>Time:</b>
+
+                            ${event.eventTime}
+
+                        </p>
+
+                        <p>
+
+                            <b>Meeting Link:</b><br>
+
+                            ${event.meetingLink || 'N/A'}
+
+                        </p>
+
+                        <p>
+
+                            <b>Posted By:</b>
+
+                            ${event.ngoName}
+
+                        </p>
+
+                        <button class="delete-btn"
+                                onclick="deleteEvent(${event.id})">
+
+                            Delete Event
+
+                        </button>
+
+                    </div>
+
+                `;
+
+            });
+
+        }
+
+        // =========================
+        // DELETE EVENT
+        // =========================
+
+        async function deleteEvent(id){
+
+            await fetch(
+
+                `${API_URL}/delete/${id}`,
+
+                {
+                    method:"DELETE"
+                }
+
+            );
+
+            loadEvents();
+
+        }
+
+        // =========================
+        // INITIAL LOAD
+        // =========================
+
+        window.createEvent =
+            createEvent;
+
+        window.deleteEvent =
+            deleteEvent;
+
+        document.getElementById(
+            "createEventButton"
+        ).addEventListener(
+            "click",
+            createEvent
+        );
+
+        loadEvents();
+
+    </script>
+
+</body>
+
+</html>

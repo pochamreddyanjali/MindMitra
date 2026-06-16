@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width,
+                   initial-scale=1.0">
+
+    <title>NGO Polls</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+
+            background:#fffbeb;
+
+            min-height:100vh;
+
+            padding:30px;
+        }
+
+        h1{
+
+            text-align:center;
+
+            color:#d97706;
+
+            margin-bottom:35px;
+
+            font-size:42px;
+        }
+
+        .container{
+
+            max-width:950px;
+
+            margin:auto;
+        }
+
+        .form-box{
+
+            background:white;
+
+            padding:30px;
+
+            border-radius:20px;
+
+            margin-bottom:35px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .input-group{
+
+            margin-bottom:20px;
+        }
+
+        .input-group label{
+
+            display:block;
+
+            margin-bottom:10px;
+
+            font-weight:bold;
+        }
+
+        .input-group input{
+
+            width:100%;
+
+            padding:14px;
+
+            border-radius:12px;
+
+            border:1px solid #ddd;
+
+            font-size:16px;
+        }
+
+        .create-btn{
+
+            width:100%;
+
+            padding:15px;
+
+            border:none;
+
+            border-radius:12px;
+
+            background:#7c3aed;
+
+            color:white;
+
+            font-size:17px;
+
+            cursor:pointer;
+        }
+
+        .poll-card{
+
+            background:white;
+
+            padding:25px;
+
+            border-radius:20px;
+
+            margin-bottom:25px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .poll-card h2{
+
+            color:#7c3aed;
+
+            margin-bottom:20px;
+        }
+
+        .option{
+
+            background:#f3f4f6;
+
+            padding:12px;
+
+            border-radius:10px;
+
+            margin-bottom:10px;
+        }
+
+        .delete-btn{
+
+            margin-top:15px;
+
+            padding:12px 20px;
+
+            border:none;
+
+            border-radius:10px;
+
+            background:#dc2626;
+
+            color:white;
+
+            cursor:pointer;
+        }
+
+        .result{
+
+            margin-top:15px;
+
+            color:#444;
+
+            font-weight:bold;
+        }
+
+        .message{
+
+            margin-top:15px;
+
+            text-align:center;
+
+            color:green;
+
+            font-weight:bold;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>📊 NGO Polls</h1>
+
+        <!-- CREATE POLL -->
+
+        <div class="form-box">
+
+            <!-- QUESTION -->
+
+            <div class="input-group">
+
+                <label>
+                    Poll Question
+                </label>
+
+                <input type="text"
+                       id="question"
+                       placeholder="Enter Poll Question">
+
+            </div>
+
+            <!-- OPTIONS -->
+
+            <div class="input-group">
+
+                <label>
+                    Option 1
+                </label>
+
+                <input type="text"
+                       id="option1">
+
+            </div>
+
+            <div class="input-group">
+
+                <label>
+                    Option 2
+                </label>
+
+                <input type="text"
+                       id="option2">
+
+            </div>
+
+            <div class="input-group">
+
+                <label>
+                    Option 3
+                </label>
+
+                <input type="text"
+                       id="option3">
+
+            </div>
+
+            <div class="input-group">
+
+                <label>
+                    Option 4
+                </label>
+
+                <input type="text"
+                       id="option4">
+
+            </div>
+
+            <!-- BUTTON -->
+
+            <button class="create-btn"
+                    onclick="createPoll()">
+
+                Create Poll
+
+            </button>
+
+            <div class="message"
+                 id="responseMessage">
+
+            </div>
+
+        </div>
+
+        <!-- POLLS -->
+
+        <div id="pollContainer">
+
+        </div>
+
+    </div>
+
+    <script>
+
+        const API_URL =
+            "http://localhost:8081/poll";
+
+        // GROUP ID
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        const groupId =
+            params.get("groupId");
+
+        // NGO DETAILS
+
+        const ngoEmail =
+            params.get(
+                "ngoEmail"
+            ) ||
+            localStorage.getItem(
+                "ngoEmail"
+            ) ||
+            "";
+
+        const ngoName =
+            params.get(
+                "ngoName"
+            ) ||
+            localStorage.getItem(
+                "ngoName"
+            ) ||
+            "";
+
+        // =========================
+        // CREATE POLL
+        // =========================
+
+        async function createPoll(){
+
+            const question =
+                document.getElementById(
+                    "question"
+                ).value;
+
+            const option1 =
+                document.getElementById(
+                    "option1"
+                ).value;
+
+            const option2 =
+                document.getElementById(
+                    "option2"
+                ).value;
+
+            const option3 =
+                document.getElementById(
+                    "option3"
+                ).value;
+
+            const option4 =
+                document.getElementById(
+                    "option4"
+                ).value;
+
+            const response =
+                await fetch(
+
+                    `${API_URL}/create`,
+
+                    {
+
+                        method:"POST",
+
+                        headers:{
+                            "Content-Type":
+                            "application/json"
+                        },
+
+                        body:JSON.stringify({
+
+                            groupId,
+
+                            question,
+
+                            option1,
+
+                            option2,
+
+                            option3,
+
+                            option4,
+
+                            ngoEmail,
+
+                            ngoName
+
+                        })
+
+                    }
+
+                );
+
+            const result =
+                await response.text();
+
+            document.getElementById(
+                "responseMessage"
+            ).innerText = result;
+
+            // CLEAR FIELDS
+
+            document.getElementById(
+                "question"
+            ).value = "";
+
+            document.getElementById(
+                "option1"
+            ).value = "";
+
+            document.getElementById(
+                "option2"
+            ).value = "";
+
+            document.getElementById(
+                "option3"
+            ).value = "";
+
+            document.getElementById(
+                "option4"
+            ).value = "";
+
+            loadPolls();
+
+        }
+
+        // =========================
+        // LOAD POLLS
+        // =========================
+
+        async function loadPolls(){
+
+            const response =
+                await fetch(
+
+                    `${API_URL}/group/${groupId}`
+
+                );
+
+            const polls =
+                await response.json();
+
+            displayPolls(polls);
+
+        }
+
+        // =========================
+        // DISPLAY POLLS
+        // =========================
+
+        async function displayPolls(polls){
+
+            const container =
+                document.getElementById(
+                    "pollContainer"
+                );
+
+            container.innerHTML = "";
+
+            for(const poll of polls){
+
+                const resultResponse =
+                    await fetch(
+
+                        `${API_URL}/results/${poll.id}`
+
+                    );
+
+                const results =
+                    await resultResponse.json();
+
+                container.innerHTML += `
+
+                    <div class="poll-card">
+
+                        <h2>
+                            ${poll.question}
+                        </h2>
+
+                        <div class="option">
+                            ${poll.option1 || ''}
+                        </div>
+
+                        <div class="option">
+                            ${poll.option2 || ''}
+                        </div>
+
+                        <div class="option">
+                            ${poll.option3 || ''}
+                        </div>
+
+                        <div class="option">
+                            ${poll.option4 || ''}
+                        </div>
+
+                        <div class="result">
+
+                            Results:<br>
+
+                            ${Object.entries(results)
+                                .map(r =>
+                                    `${r[0]} : ${r[1]} votes`
+                                ).join("<br>")}
+
+                        </div>
+
+                        <button class="delete-btn"
+                                onclick="deletePoll(${poll.id})">
+
+                            Delete Poll
+
+                        </button>
+
+                    </div>
+
+                `;
+
+            }
+
+        }
+
+        // =========================
+        // DELETE POLL
+        // =========================
+
+        async function deletePoll(id){
+
+            await fetch(
+
+                `${API_URL}/delete/${id}`,
+
+                {
+                    method:"DELETE"
+                }
+
+            );
+
+            loadPolls();
+
+        }
+
+        // =========================
+        // INITIAL LOAD
+        // =========================
+
+        loadPolls();
+
+    </script>
+
+</body>
+
+</html>

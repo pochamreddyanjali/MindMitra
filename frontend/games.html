@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindMitra Stress Relief Games</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+
+            background:#dbeafe;
+
+            padding:40px;
+        }
+
+        h1{
+
+            text-align:center;
+
+            color:#2563eb;
+
+            font-size:50px;
+
+            margin-bottom:15px;
+        }
+
+        .subtitle{
+
+            text-align:center;
+
+            color:#555;
+
+            font-size:20px;
+
+            margin-bottom:50px;
+        }
+
+        .container{
+
+            display:grid;
+
+            grid-template-columns:
+                repeat(auto-fit,minmax(280px,1fr));
+
+            gap:30px;
+
+            max-width:1200px;
+
+            margin:auto;
+        }
+
+        .card{
+
+            background:white;
+
+            padding:35px;
+
+            border-radius:25px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.15);
+
+            transition:0.3s;
+
+            cursor:pointer;
+
+            text-align:center;
+        }
+
+        .card:hover{
+
+            transform:translateY(-10px);
+
+            box-shadow:0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .icon{
+
+            font-size:70px;
+
+            margin-bottom:20px;
+        }
+
+        .title{
+
+            font-size:28px;
+
+            color:#2563eb;
+
+            margin-bottom:15px;
+
+            font-weight:bold;
+        }
+
+        .description{
+
+            color:#555;
+
+            line-height:1.7;
+
+            font-size:16px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <h1>🎮 MindMitra Games</h1>
+
+    <div class="subtitle">
+        Relax your mind through calming and stress-relief games 🌿
+    </div>
+
+    <div class="container">
+
+        <!-- BUBBLE GAME -->
+
+        <div class="card" onclick="openBubbleGame()">
+
+            <div class="icon">🫧</div>
+
+            <div class="title">
+                Bubble Pop Relaxation
+            </div>
+
+            <div class="description">
+                Pop floating bubbles and relax your mind
+                with calming visuals and smooth gameplay.
+            </div>
+
+        </div>
+
+        <!-- MEMORY GAME -->
+
+        <div class="card" onclick="openMemoryGame()">
+
+            <div class="icon">🧠</div>
+
+            <div class="title">
+                Memory Match
+            </div>
+
+            <div class="description">
+                Improve focus and concentration through
+                relaxing memory matching exercises.
+            </div>
+
+        </div>
+
+        <!-- MANDALA GAME -->
+
+        <div class="card" onclick="openMandalaGame()">
+
+            <div class="icon">🌸</div>
+
+            <div class="title">
+                Mandala Coloring
+            </div>
+
+            <div class="description">
+                Relax your mind by coloring beautiful
+                mandala patterns with soothing colors.
+            </div>
+
+        </div>
+
+        <!-- COLOR GAME -->
+
+        <div class="card" onclick="openColorGame()">
+
+            <div class="icon">🎨</div>
+
+            <div class="title">
+                Color Therapy
+            </div>
+
+            <div class="description">
+                Experience soothing color interactions
+                designed for emotional relaxation.
+            </div>
+
+        </div>
+
+        <!-- FOCUS GAME -->
+
+        <div class="card" onclick="openFocusGame()">
+
+            <div class="icon">⚡</div>
+
+            <div class="title">
+                Focus Tap Challenge
+            </div>
+
+            <div class="description">
+                Enhance mindfulness and concentration
+                through simple focus activities.
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        function openBubbleGame(){
+
+            window.location.href =
+                "bubblegame.html";
+
+        }
+
+        function openMemoryGame(){
+
+            window.location.href =
+                "memorygame.html";
+
+        }
+
+        function openMandalaGame(){
+
+            window.location.href =
+                "mandalagame.html";
+
+        }
+
+        function openColorGame(){
+
+            window.location.href =
+                "colorgame.html";
+
+        }
+
+        function openFocusGame(){
+
+            window.location.href =
+                "focusgame.html";
+
+        }
+
+    </script>
+
+</body>
+</html>

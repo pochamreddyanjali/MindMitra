@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width,
+                   initial-scale=1.0">
+
+    <title>Group Details</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+
+            background:#fffbeb;
+
+            min-height:100vh;
+
+            padding:30px;
+        }
+
+        .container{
+
+            max-width:1000px;
+
+            margin:auto;
+        }
+
+        .group-card{
+
+            background:white;
+
+            padding:30px;
+
+            border-radius:25px;
+
+            margin-bottom:35px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .group-icon{
+
+            font-size:70px;
+
+            margin-bottom:20px;
+        }
+
+        h1{
+
+            color:#d97706;
+
+            margin-bottom:15px;
+
+            font-size:42px;
+        }
+
+        .privacy{
+
+            display:inline-block;
+
+            padding:8px 15px;
+
+            border-radius:20px;
+
+            color:white;
+
+            margin-bottom:20px;
+        }
+
+        .public{
+
+            background:green;
+        }
+
+        .private{
+
+            background:#dc2626;
+        }
+
+        p{
+
+            color:#444;
+
+            line-height:1.8;
+
+            margin-bottom:15px;
+        }
+
+        .cards{
+
+            display:grid;
+
+            grid-template-columns:
+                repeat(auto-fit,minmax(280px,1fr));
+
+            gap:25px;
+        }
+
+        .card{
+
+            background:white;
+
+            padding:25px;
+
+            border-radius:20px;
+
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+
+            cursor:pointer;
+
+            transition:0.3s;
+        }
+
+        .card:hover{
+
+            transform:translateY(-8px);
+        }
+
+        .icon{
+
+            font-size:55px;
+
+            margin-bottom:18px;
+        }
+
+        .card h2{
+
+            color:#d97706;
+
+            margin-bottom:12px;
+        }
+
+        .card p{
+
+            color:#555;
+        }
+
+        .leave-group-btn{
+
+            padding:14px 22px;
+
+            border:none;
+
+            border-radius:12px;
+
+            background:#dc2626;
+
+            color:white;
+
+            cursor:pointer;
+
+            font-size:16px;
+
+            margin-top:10px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container"
+         id="groupContent"
+         style="display:none;">
+
+        <!-- GROUP DETAILS -->
+
+        <div class="group-card"
+             id="groupCard">
+
+        </div>
+
+        <!-- FEATURE CARDS -->
+
+        <div class="cards">
+
+            <!-- ANNOUNCEMENTS -->
+
+            <div class="card"
+                 onclick="openAnnouncements()">
+
+                <div class="icon">📢</div>
+
+                <h2>Announcements</h2>
+
+                <p>
+
+                    View NGO announcements,
+                    activities and meeting links
+
+                </p>
+
+            </div>
+
+            <!-- POLLS -->
+
+            <div class="card"
+                 onclick="openPolls()">
+
+                <div class="icon">📊</div>
+
+                <h2>Polls</h2>
+
+                <p>
+
+                    Participate in community
+                    polls and voting
+
+                </p>
+
+            </div>
+
+            <!-- EVENTS -->
+
+            <div class="card"
+                 onclick="openEvents()">
+
+                <div class="icon">🎉</div>
+
+                <h2>Events</h2>
+
+                <p>
+
+                    Join outdoor activities,
+                    workshops and sessions
+
+                </p>
+
+            </div>
+
+            <!-- CHAT -->
+
+            <div class="card"
+                 onclick="openChat()">
+
+                <div class="icon">💬</div>
+
+                <h2>Group Chat</h2>
+
+                <p>
+
+                    Chat with NGO admins
+                    and community members
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+<script>
+
+    const API_URL =
+        "http://localhost:8081/ngo-group";
+
+    // =========================
+    // URL PARAMS
+    // =========================
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const groupId =
+        params.get("groupId");
+
+    const userEmail =
+        params.get("userEmail") ||
+        localStorage.getItem("userEmail") ||
+        "";
+
+    const userName =
+        params.get("userName");
+
+    const displayUserName =
+        userName &&
+        userName !== "null"
+            ? userName
+            : userEmail;
+
+    let activeGroup = null;
+
+    // =========================
+    // CHECK ACCESS
+    // =========================
+
+    async function checkAccess(){
+
+        const groupResponse =
+            await fetch(
+
+                `${API_URL}/all`
+
+            );
+
+        const allGroups =
+            await groupResponse.json();
+
+        const group =
+            allGroups.find(g =>
+
+                g.id == groupId
+
+            );
+
+        if(!group){
+
+            document.body.innerHTML = `
+
+                <div style="
+
+                    height:100vh;
+                    display:flex;
+                    justify-content:center;
+                    align-items:center;
+                    flex-direction:column;
+                    font-family:Arial;
+                    background:#fff7ed;
+
+                ">
+
+                    <h1 style="color:#dc2626;">
+
+                        Group Not Found
+
+                    </h1>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+        // MEMBERSHIP CHECK
+
+        const response =
+            await fetch(
+
+                `${API_URL}/user/${encodeURIComponent(userEmail)}`
+
+            );
+
+        const groups =
+            await response.json();
+
+        const membership =
+            groups.find(g =>
+
+                g.groupId == groupId
+
+            );
+
+        const approved =
+            membership
+
+                &&
+
+                membership.status === "APPROVED"
+
+            ;
+
+        if(!approved){
+
+            document.body.innerHTML = `
+
+                <div style="
+
+                    height:100vh;
+                    display:flex;
+                    justify-content:center;
+                    align-items:center;
+                    flex-direction:column;
+                    font-family:Arial;
+                    background:#fff7ed;
+
+                ">
+
+                    <h1 style="color:#dc2626;">
+
+                        Access Denied
+
+                    </h1>
+
+                    <p style="margin-top:15px;">
+
+                        Join this group first.
+                        Private groups must be approved
+                        by the NGO before opening.
+
+                    </p>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+        loadGroup(group);
+
+    }
+
+    // =========================
+    // LOAD GROUP
+    // =========================
+
+    async function loadGroup(group){
+
+        activeGroup = group;
+
+        document.getElementById(
+            "groupContent"
+        ).style.display = "block";
+
+        document.getElementById(
+            "groupCard"
+        ).innerHTML = `
+
+            <div class="group-icon">
+                👥
+            </div>
+
+            <h1>
+                ${group.groupName}
+            </h1>
+
+            <span class="privacy
+
+                ${group.privacy === "PUBLIC"
+
+                    ?
+
+                    "public"
+
+                    :
+
+                    "private"
+
+                }">
+
+                ${group.privacy}
+
+            </span>
+
+            <p>
+
+                <b>NGO:</b><br>
+
+                ${group.ngoName}
+
+            </p>
+
+            <p>
+
+                <b>Description:</b><br>
+
+                ${group.description}
+
+            </p>
+
+            <p>
+
+                <b>Meeting Link:</b><br>
+
+                ${group.meetingLink}
+
+            </p>
+
+            <p>
+
+                <b>Activities:</b><br>
+
+                ${group.activityDetails}
+
+            </p>
+
+            <button class="leave-group-btn"
+                    onclick="leaveGroup()">
+
+                Leave Group
+
+            </button>
+
+        `;
+
+    }
+
+    // =========================
+    // LEAVE GROUP
+    // =========================
+
+    async function leaveGroup(){
+
+        const confirmLeave =
+            confirm(
+                "Leave this group?"
+            );
+
+        if(!confirmLeave){
+
+            return;
+
+        }
+
+        const response =
+            await fetch(
+
+                `${API_URL}/leave?groupId=${groupId}&userEmail=${encodeURIComponent(userEmail)}`,
+
+                {
+                    method:"DELETE"
+                }
+
+            );
+
+            const result =
+                await response.text();
+
+        alert(result);
+
+        if(!result.includes("Left Group Successfully")){
+
+            return;
+
+        }
+
+        const ngoEmail =
+            activeGroup && activeGroup.ngoEmail
+                ? activeGroup.ngoEmail
+                : "";
+
+        window.location.href =
+
+            `groups.html?ngoEmail=${encodeURIComponent(ngoEmail)}&userEmail=${encodeURIComponent(userEmail)}&userName=${encodeURIComponent(displayUserName || "")}`;
+
+    }
+
+    // =========================
+    // OPEN ANNOUNCEMENTS
+    // =========================
+
+    function openAnnouncements(){
+
+        window.location.href =
+
+            `group-announcement.html?groupId=${groupId}&userEmail=${encodeURIComponent(userEmail)}&userName=${encodeURIComponent(displayUserName || "")}`;
+
+    }
+
+    // =========================
+    // OPEN POLLS
+    // =========================
+
+    function openPolls(){
+
+        window.location.href =
+
+            `group-polls.html?groupId=${groupId}&userEmail=${encodeURIComponent(userEmail)}&userName=${encodeURIComponent(displayUserName || "")}`;
+
+    }
+
+    // =========================
+    // OPEN EVENTS
+    // =========================
+
+    function openEvents(){
+
+        window.location.href =
+
+            `Group-events.html?groupId=${groupId}&userEmail=${encodeURIComponent(userEmail)}&userName=${encodeURIComponent(displayUserName || "")}`;
+
+    }
+
+    // =========================
+    // OPEN CHAT
+    // =========================
+
+    function openChat(){
+
+        window.location.href =
+
+            `group-chat.html?groupId=${groupId}&sender=${encodeURIComponent(userEmail)}&receiver=${encodeURIComponent(activeGroup.ngoEmail)}&name=${encodeURIComponent(displayUserName || "")}`;
+
+    }
+
+    // =========================
+    // INITIAL LOAD
+    // =========================
+
+    checkAccess();
+
+</script>
+
+</body>
+
+</html>
