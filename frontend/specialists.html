@@ -412,178 +412,50 @@
 
                             </p>
 
+                            ${existingRequest.specialistOpinion  ?` 
+                            <p><b>Specialist Response:</b>${existingRequest.specialistOpinion}</p> `
+                             :""
+                             }
+
                             ${
-                                existingRequest.specialistOpinion
+                                existingRequest.specialistAvailability ?
+                                `<p><b>Availability:</b>${existingRequest.specialistAvailability}</p>`
+                                :""
+                            }
+                            ${
+                                existingRequest.communicationMode ?
 
-                                ?
-
-                                `
-
-                                <p>
-
-                                    <b>Specialist Response:</b>
-
-                                    ${existingRequest.specialistOpinion}
-
+                                `<p><b>Mode:</b>${existingRequest.communicationMode}</p>`:""
+                            }
+                            ${
+                                existingRequest.meetingLink   ?
+                               `<p><b>${existingRequest.communicationMode=== "Online" ?"Meeting Link":"Meeting Location"}:</b>
+                                    ${existingRequest.communicationMode=== "Online" ?`<a href="${existingRequest.meetingLink}" target="_blank"> Open Meeting
+                                       </a>` :existingRequest.meetingLink}
                                 </p>
-
-                                `
-
-                                :
-
-                                ""
-
+                                `:""
                             }
 
                             ${
-                                existingRequest.specialistAvailability
-
-                                ?
-
-                                `
-
-                                <p>
-
-                                    <b>Availability:</b>
-
-                                    ${existingRequest.specialistAvailability}
-
-                                </p>
-
-                                `
-
-                                :
-
-                                ""
-
-                            }
-
-                            ${
-                                existingRequest.communicationMode
-
-                                ?
-
-                                `
-
-                                <p>
-
-                                    <b>Mode:</b>
-
-                                    ${existingRequest.communicationMode}
-
-                                </p>
-
-                                `
-
-                                :
-
-                                ""
-
-                            }
-
-                            ${
-                                existingRequest.meetingLink
-
-                                ?
-
-                                `
-
-                                <p>
-
-                                    <b>
-
-                                        ${
-                                            existingRequest.communicationMode
-                                            === "Online"
-
-                                            ?
-
-                                            "Meeting Link"
-
-                                            :
-
-                                            "Meeting Location"
-
-                                        }:
-
-                                    </b>
-
-                                    ${
-                                        existingRequest.communicationMode
-                                        === "Online"
-
-                                        ?
-
-                                        `
-
-                                        <a href="${existingRequest.meetingLink}"
-                                           target="_blank">
-
-                                            Open Meeting
-
-                                        </a>
-
-                                        `
-
-                                        :
-
-                                        existingRequest.meetingLink
-
-                                    }
-
-                                </p>
-
-                                `
-
-                                :
-
-                                ""
-
-                            }
-
-                            ${
-                                existingRequest.status === "ACCEPTED"
-
-                                ?
-
-                                `
-
+                                existingRequest.status === "ACCEPTED"?`
                                 <div class="chat-wrapper">
-
                                     <button class="connect-btn"
-
                                         onclick="openChat(
                                             '${userEmail}',
                                             '${s.email}',
                                             '${s.name}'
                                         )">
-
                                         Chat With Specialist
-
                                     </button>
-
                                     <span
                                         class="badge"
                                         id="badge-${s.email}"
-
                                         style="display:none;">
-
                                     </span>
-
-                                </div>
-
-                                `
-
-                                :
-
-                                ""
-
+                                </div>`:""
                             }
-
                         </div>
-
                     `;
-
                 }
 
                 // =========================
@@ -603,16 +475,11 @@
 
                             Connect
 
-                        </button>
-
-                    `;
-
+                        </button> `;
                 }
-
                 // =========================
                 // CARD UI
                 // =========================
-
                 container.innerHTML += `
 
                     <div class="card">
